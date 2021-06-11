@@ -62,8 +62,8 @@ pipeline {
         string(name: 'DOCKER_REPO', defaultValue: 'urs-docker', description: '')
         string(name: 'DOCKER_PROMOTE', defaultValue: 'urs-docker-release-local', description: '')
         
-        booleanParam(name: 'PYTHON_BUILD', defaultValue: true, description: 'Enable Python Build')
-        booleanParam(name: 'DOCKER_BUILD', defaultValue: true, description: 'Enable Docker Build')
+        booleanParam(name: 'PYTHON_BUILD', defaultValue: false, description: 'Enable Python Build')
+        booleanParam(name: 'DOCKER_BUILD', defaultValue: false, description: 'Enable Docker Build')
     }
     
     stages {
