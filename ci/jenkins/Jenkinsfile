@@ -39,7 +39,6 @@ pipeline {
         
         ART_ID='artifactory-eu'
         JAVA_HOME = '/usr/lib/jvm/java-1.8-openjdk/'
-//        MAVEN_HOME = '/usr/share/maven'
         MY_BUILD_NAME = 'jenkins-python'
         DOCKER_BUILD_NAME = 'jenkins-python-docker'
     }
@@ -64,6 +63,10 @@ pipeline {
         
         booleanParam(name: 'PYTHON_BUILD', defaultValue: false, description: 'Enable Python Build')
         booleanParam(name: 'DOCKER_BUILD', defaultValue: false, description: 'Enable Docker Build')
+        booleanParam(name: 'INDEX_BUILD', defaultValue: false, description: 'Should be used ONLY for the 1st run for XRAY to index a build ')
+
+        string(name: 'ADM_USER', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
+        string(name: 'ADM_PASS', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
     }
     
     stages {
@@ -149,6 +152,20 @@ pipeline {
                             buildName: env.MY_BUILD_NAME,
                             buildNumber: env.BUILD_NUMBER
                         )
+
+                        sh """
+                            echo ${env.MY_BUILD_NAME}
+                            if [ ${params.INDEX_BUILD} == "true" ]; then
+                                curl \
+                                    -XPOST \
+                                    -u ${ADM_USER}:${ADM_PASS} \
+                                    -H "Content-Type: application/json" \
+                                    -d '{"names":["'${env.MY_BUILD_NAME}'"]}' \
+                                https://${params.JPD_URL}/xray/api/v1/binMgr/builds
+                            else
+                                echo "No indexing"
+                            fi 
+                        """
                     }
                 }
             }
