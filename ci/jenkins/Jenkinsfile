@@ -204,7 +204,8 @@ pipeline {
                     comment: 'Xray scan passed',
                     status: 'VULN_SCAN_OK',
                     includeDependencies: false,
-                    copy: false
+                    copy: false,
+                    failFast: false
                 )               
             }
         }
@@ -229,8 +230,7 @@ pipeline {
                         captureEnv: true,
                         excludeEnvPatterns: ['*MY_BUILD_NAME*', 'DOCKER_BUILD_NAME'],
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER,
-                        failFast: false
+                        buildNumber: env.BUILD_NUMBER
                     )
                     
                     rtDownload (
@@ -271,8 +271,7 @@ pipeline {
                     rtPublishBuildInfo (
                         serverId: env.ART_ID,
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER,
-                        failFast: false
+                        buildNumber: env.BUILD_NUMBER
                     )
 
                     sh """
@@ -326,7 +325,8 @@ pipeline {
                     comment: 'Xray scan passed',
                     status: 'VULN_SCAN_OK',
                     includeDependencies: false,
-                    copy: false
+                    copy: false,
+                    failFast: false
                 )               
             }
         } // end stage
