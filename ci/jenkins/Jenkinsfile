@@ -183,7 +183,22 @@ pipeline {
                     buildName: env.MY_BUILD_NAME,
                     buildNumber: env.BUILD_NUMBER,
                     failBuild: false
-                )   
+                )
+
+                sh """
+                    // ugly workaround to see the scan result in the UI
+                    if [ ${params.INDEX_BUILD} == "true" ]; then
+                        curl \
+                            -XPOST \
+                            -u ${ADM_USER}:${ADM_PASS} \
+                            -H "Content-Type: application/json" \
+                            -d '{"names":["'${env.MY_BUILD_NAME}'"]}' \
+                            -d '{"buildName": "'${env.MY_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
+                        https://${params.JPD_URL}/xray/api/v1/scanBuild
+                    else
+                        echo "No indexing"
+                    fi 
+                """   
             }
         }
         
@@ -304,7 +319,22 @@ pipeline {
                     buildName: env.DOCKER_BUILD_NAME,
                     buildNumber: env.BUILD_NUMBER,
                     failBuild: false
-                )   
+                )
+
+                sh """
+                    // ugly workaround to see the scan result in the UI
+                    if [ ${params.INDEX_BUILD} == "true" ]; then
+                        curl \
+                            -XPOST \
+                            -u ${ADM_USER}:${ADM_PASS} \
+                            -H "Content-Type: application/json" \
+                            -d '{"names":["'${env.MY_BUILD_NAME}'"]}' \
+                            -d '{"buildName": "'${env.DOCKER_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
+                        https://${params.JPD_URL}/xray/api/v1/scanBuild
+                    else
+                        echo "No indexing"
+                    fi 
+                """   
             }
         }
         
