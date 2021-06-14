@@ -229,7 +229,8 @@ pipeline {
                         captureEnv: true,
                         excludeEnvPatterns: ['*MY_BUILD_NAME*', 'DOCKER_BUILD_NAME'],
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
+                        buildNumber: env.BUILD_NUMBER,
+                        failFast: false
                     )
                     
                     rtDownload (
@@ -270,8 +271,24 @@ pipeline {
                     rtPublishBuildInfo (
                         serverId: env.ART_ID,
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
+                        buildNumber: env.BUILD_NUMBER,
+                        failFast: false
                     )
+
+                    sh """
+                        echo ${env.MY_BUILD_NAME}
+                        if [ ${params.INDEX_BUILD} == "true" ]; then
+                            curl \
+                                -XPOST \
+                                -u ${ADM_USER}:${ADM_PASS} \
+                                -H "Content-Type: application/json" \
+                                -d '{"names":["'${env.DOCKER_BUILD_NAME}'"]}' \
+                            https://${params.JPD_URL}/xray/api/v1/binMgr/builds
+                        else
+                            echo "No indexing"
+                        fi 
+                    """
+
                 }
             } // end steps
         } // end stage
