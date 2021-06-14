@@ -290,7 +290,6 @@ pipeline {
                     )
 
                     sh """
-                        echo ${env.MY_BUILD_NAME}
                         if [ ${params.INDEX_BUILD} == "true" ]; then
                             curl \
                                 -XPOST \
@@ -328,7 +327,6 @@ pipeline {
                             -XPOST \
                             -u ${ADM_USER}:${ADM_PASS} \
                             -H "Content-Type: application/json" \
-                            -d '{"names":["'${env.MY_BUILD_NAME}'"]}' \
                             -d '{"buildName": "'${env.DOCKER_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
                         https://${params.JPD_URL}/xray/api/v1/scanBuild
                     else
