@@ -161,7 +161,7 @@ pipeline {
                                   \"files\": [
                                     {
                                       \"pattern\": \"webapp-${params.NEW_VERSION}.tar.gz\",
-                                      \"repo\": \"${params.GENERIC_REPO}\"                                      
+                                      \"props\": \"build.name=${env.MY_BUILD_NAME},build.number=${env.BUILD_NUMBER}\"                           
                                     }
                                   ]
                             }""",
