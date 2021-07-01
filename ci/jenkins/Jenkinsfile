@@ -50,7 +50,8 @@ pipeline {
 
         string(name: 'JPD_URL', defaultValue: 'yann-swampup.dev.aws.devopsacc.team', description: 'DO NOT ADD PROTOCOL')
 
-        string(name: 'NEW_VERSION', defaultValue: '2.0.0', description: '')
+        string(name: 'APP_NAME', defaultValue: 'snake', description: 'will be added as metadata on built artifacts as app.name')
+        string(name: 'NEW_VERSION', defaultValue: '2.0.0', description: 'will be added as metadata on built artifacts as app.version')
         string(name: 'YOUR_NAME', defaultValue: 'tony', description: 'will be injected in the config.yaml')
         string(name: 'NEW_MSG', defaultValue: 'Welcome to Swampup 2021', description: '')
 
@@ -383,7 +384,7 @@ pipeline {
                         -XPOST \
                         -H "authorization: ${params.JPIPE_PASS}" \
                         -H "Content-Type: application/json" \
-                        -d '{"DockerBuildName": "'${env.DOCKER_BUILD_NAME}'", "buildNumber": "'\${bNumber}'" }' \
+                        -d '{"DockerBuildName": "'${env.DOCKER_BUILD_NAME}'", "buildNumber": "'\${bNumber}'", "appName": "'${params.APP_NAME}'", "appVersion":"'${params.NEW_VERSION}'"}' \
                     "${params.JPIPE_URL}"
                 """
             }
