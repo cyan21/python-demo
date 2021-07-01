@@ -151,11 +151,22 @@ pipeline {
                                   ]
                             }""",
                             module: 'webapp',
-                            properties: "app.name=${params.APP_NAME};app.version=${params.NEW_VERSION}",
                             buildName: env.MY_BUILD_NAME,
                             buildNumber: env.BUILD_NUMBER
                         )
-                        
+
+                        rtSetProps (
+                            serverId: env.ART_ID,
+                            spec: """{
+                                  \"files\": [
+                                    {
+                                      \"pattern\": \"webapp-${params.NEW_VERSION}.tar.gz\",
+                                      \"repo\": \"${params.GENERIC_REPO}\"                                      
+                                    }
+                                  ]
+                            }""",
+                            props: "app.name=${params.APP_NAME};app.version=${params.NEW_VERSION}"
+                        )
 
                         rtPublishBuildInfo (
                             serverId: env.ART_ID,
