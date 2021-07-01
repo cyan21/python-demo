@@ -151,6 +151,7 @@ pipeline {
                                   ]
                             }""",
                             module: 'webapp',
+                            properties: "app.name=${params.APP_NAME};app.version=${params.NEW_VERSION}",
                             buildName: env.MY_BUILD_NAME,
                             buildNumber: env.BUILD_NUMBER
                         )
@@ -286,7 +287,7 @@ pipeline {
                         serverId: env.ART_ID,
                         image: "${params.JPD_URL}/${params.DOCKER_REPO}/jenkins-python-webapp:${params.NEW_VERSION}",
                         targetRepo: env.DOCKER_REPO,
-                        properties: 'project-name=uranus;status=stable',
+                        properties: "app.name=${params.APP_NAME};app.version=${params.NEW_VERSION}",
                         buildName: env.DOCKER_BUILD_NAME,
                         buildNumber: env.BUILD_NUMBER
                     )
