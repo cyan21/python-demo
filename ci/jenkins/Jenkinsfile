@@ -164,7 +164,7 @@ pipeline {
                                             \"items.find\": {
                                                 \"repo\":\"${params.GENERIC_REPO}\",
                                                 \"@build.name\": \"${env.MY_BUILD_NAME}\",
-                                                \"@build.number\": \"${env.BUILD_NUMBER}\",
+                                                \"@build.number\": \"${env.BUILD_NUMBER}\"
                                             }
                                         }                          
                                     }
