@@ -8,6 +8,10 @@ pipeline {
               labels:
                 some-label: some-label-value
             spec:
+              hostAliases:
+              - ip: "34.121.100.83"
+                hostnames:
+                - "urs-docker.platform-us.staging.gcp.devopsacc.team"
               containers:
               - name: python
                 image: python:3.9.5-alpine3.13
@@ -41,6 +45,7 @@ pipeline {
         JAVA_HOME = '/usr/lib/jvm/java-1.8-openjdk/'
         MY_BUILD_NAME = 'jenkins-python'
         DOCKER_BUILD_NAME = 'jenkins-python-docker'
+        DOCKER_REGISTRY_URL=sh(returnStdout: true, script: """ if [ \"${params.DOCKER_SUB_DOMAIN}\" = \"true\" ]; then echo \"${params.DOCKER_REPO}.${params.JPD_URL}\"; else echo \"${params.JPD_URL}/${params.DOCKER_REPO}\"; fi""")
     }
 
     parameters {
@@ -61,6 +66,7 @@ pipeline {
 
         string(name: 'DOCKER_REPO', defaultValue: 'urs-docker', description: '')
         string(name: 'DOCKER_PROMOTE', defaultValue: 'urs-docker-release-local', description: '')
+        booleanParam(name: 'DOCKER_SUB_DOMAIN', defaultValue: true, description: 'false means Docker Repo Path')
         
         booleanParam(name: 'PYTHON_BUILD', defaultValue: false, description: 'Enable Python Build')
         booleanParam(name: 'DOCKER_BUILD', defaultValue: false, description: 'Enable Docker Build')
@@ -295,13 +301,13 @@ pipeline {
                         git_path=`echo ${params.MY_GIT_URL} | cut -d/ -f4,5`
                         echo \${git_path}
                         curl -O https://raw.githubusercontent.com/\${git_path}/${params.MY_GIT_BRANCH}/src/Dockerfile
-                        docker login -u ${ARTY_CREDS_USR} -p ${ARTY_CREDS_PSW} ${params.JPD_URL}
-                        docker build --network=host -t ${params.JPD_URL}/${params.DOCKER_REPO}/jenkins-python-webapp:${params.NEW_VERSION} .
+                        docker login -u ${ARTY_CREDS_USR} -p ${ARTY_CREDS_PSW} ${env.DOCKER_REGISTRY_URL}
+                        docker build --network=host -t ${env.DOCKER_REGISTRY_URL}/${params.DOCKER_REPO}/jenkins-python-webapp:${params.NEW_VERSION} .
                     """
                 
                     rtDockerPush(
                         serverId: env.ART_ID,
-                        image: "${params.JPD_URL}/${params.DOCKER_REPO}/jenkins-python-webapp:${params.NEW_VERSION}",
+                        image: "${env.DOCKER_REGISTRY_URL}/jenkins-python-webapp:${params.NEW_VERSION}",
                         targetRepo: env.DOCKER_REPO,
                         properties: "app.name=${params.APP_NAME};app.version=${params.NEW_VERSION}",
                         buildName: env.DOCKER_BUILD_NAME,
