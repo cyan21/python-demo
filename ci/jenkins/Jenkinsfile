@@ -41,7 +41,7 @@ pipeline {
         JAVA_HOME = '/usr/lib/jvm/java-1.8-openjdk/'
         MY_BUILD_NAME = 'jenkins-python'
         DOCKER_BUILD_NAME = 'jenkins-python-docker'
-        DOCKER_REGISTRY_URL=sh(returnStdout: true, script: """ if [ \"${params.DOCKER_SUB_DOMAIN}\" = \"true\" ]; then echo \"${params.DOCKER_REPO}.${params.JPD_URL}\"; else echo \"${params.JPD_URL}/${params.DOCKER_REPO}\"; fi""")
+        DOCKER_REGISTRY_URL=sh(returnStdout: true, script: """ if [ \"${params.DOCKER_SUB_DOMAIN}\" = \"true\" ]; then echo \"${params.DOCKER_REPO}.${params.JPD_URL}\"; else echo \"${params.JPD_URL}/${params.DOCKER_REPO}\"; fi""").trim()
     }
 
     parameters {
