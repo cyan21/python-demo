@@ -8,10 +8,6 @@ pipeline {
               labels:
                 some-label: some-label-value
             spec:
-              hostAliases:
-              - ip: "34.121.100.83"
-                hostnames:
-                - "urs-docker.platform-us.staging.gcp.devopsacc.team"
               containers:
               - name: python
                 image: python:3.9.5-alpine3.13
@@ -53,7 +49,7 @@ pipeline {
         string(name: 'MY_GIT_URL', defaultValue: 'https://github.com/cyan21/python-demo', description: 'DO NOT ADD .git AT THE END')
         string(name: 'MY_GIT_BRANCH', defaultValue: 'soleng-stg', description: '')
 
-        string(name: 'JPD_URL', defaultValue: 'platform-us.staging.gcp.devopsacc.team', description: 'DO NOT ADD PROTOCOL')
+        string(name: 'JPD_URL', defaultValue: '', description: 'DO NOT ADD PROTOCOL')
 
         string(name: 'APP_NAME', defaultValue: 'snake', description: 'will be added as metadata on built artifacts as app.name')
         string(name: 'NEW_VERSION', defaultValue: '2.0.0', description: 'will be added as metadata on built artifacts as app.version')
@@ -66,7 +62,7 @@ pipeline {
 
         string(name: 'DOCKER_REPO', defaultValue: 'urs-docker', description: '')
         string(name: 'DOCKER_PROMOTE', defaultValue: 'urs-docker-release-local', description: '')
-        booleanParam(name: 'DOCKER_SUB_DOMAIN', defaultValue: true, description: 'false means Docker Repo Path')
+        booleanParam(name: 'DOCKER_SUB_DOMAIN', defaultValue: false, description: 'false means Docker Repo Path')
         
         booleanParam(name: 'PYTHON_BUILD', defaultValue: false, description: 'Enable Python Build')
         booleanParam(name: 'DOCKER_BUILD', defaultValue: false, description: 'Enable Docker Build')
@@ -78,7 +74,7 @@ pipeline {
         string(name: 'ADM_PASS', defaultValue: '', description: 'Only used if INDEX_BUILD is ticked')
 
         booleanParam(name: 'JPIPE_TRIGGER', defaultValue: false, description: '')
-        string(name: 'JPIPE_URL', defaultValue: 'https://pipelines-api-us.staging.gcp.devopsacc.team/v1/projectIntegrations/36/hook', description: '')
+        string(name: 'JPIPE_URL', defaultValue: '', description: '')
         string(name: 'JPIPE_PASS', defaultValue: '***', description: '')
 
         string(name: 'MY_BUILD_NUMBER', defaultValue: '0', description: 'Only used if JPIPE_TRIGGER is ticked. If set to 0 will take the current run ID')
