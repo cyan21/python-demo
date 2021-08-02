@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: python-webapp
 
 # Controls when the workflow will run
 on:
@@ -34,6 +34,7 @@ jobs:
 
       - name: Ping Artifactory
         run: |
+            jfrog --version
             jfrog config show
             jfrog rt ping
             
@@ -46,8 +47,11 @@ jobs:
       - name: Package and upload webapp
         run: |
           tar -czvf webapp_python.tar.gz src/*.yaml src/*.txt src/*.py
-          jfrog rt upload webapp_python.tar.gz ${{ env.GENERIC_REPO }} --build-name $JFROG_CLI_BUILD_NAME --build-number $JFROG_CLI_BUILD_NUMBER
+          jfrog rt upload webapp_python.tar.gz ${{ env.GENERIC_REPO }} --build-name $JFROG_CLI_BUILD_NAME --build-number $JFROG_CLI_BUILD_NUMBER --module=python_webapp
 
+      - name: Set properties
+        run: jfrog rt sp --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER "maturity=release-candidate;platform=windows,linux;qa.status=wip"
+        
       - name: Publish Build Info
         run: |
           # Collect environment variables for the build
