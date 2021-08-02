@@ -26,7 +26,9 @@ jobs:
 
       - name: Setup JFrog CLI
         uses: jfrog/setup-jfrog-cli@v1.2.0
-
+        with:
+          version: 2.1.1
+    
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v2.2.2
         with:
@@ -52,11 +54,11 @@ jobs:
       - name: Publish Build Info
         run: |
           # Collect environment variables for the build
-          jfrog rt bce $JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+          jfrog rt bce 
           # Collect VCS details from git and add them to the build
-          jfrog rt bag $JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+          jfrog rt bag
           # Publish build info
-          jfrog rt bp $JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+          jfrog rt bp
 
       - name: Set properties
-        run: jfrog rt sp --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER "qa.status=wip"
+        run: jfrog rt sp --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER ${{ env.GENERIC_REPO }}/ "qa.status=wip"
