@@ -34,11 +34,11 @@ jobs:
 
       - name: Ping Artifactory
         run: |
+            jfrog config show
             jfrog rt ping
-            jfrog rt c show
             
       - name: Configure JFrog CLI and PIP client
-        run: jfrog rt pip-config --repo-resolve ${{ env.PYTHON_REPO }} --server-id-resolve art1
+        run: jfrog rt pip-config --repo-resolve ${{ env.PYTHON_REPO }} --server-id-resolve yann-swampup
 
       - name: Install dependencies
         run: jfrog rt pip-install -r src/requirements.txt --no-cache-dir  --build-name=$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER --module=python_deps
