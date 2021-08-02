@@ -15,22 +15,46 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    env:
+      JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
+      JFROG_BUILD_STATUS: PASS
+      PYTHON_VERSION: 3.9
+      PYTHON_REPO: urs-python
+      GENERIC_REPO: urs-generic
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Setup JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v1.2.0
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Ping Artifactory
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+            jfrog rt ping
+            jfrog rt c show
+            
+      - name: Configure JFrog CLI and PIP client
+        run: jfrog rt pip-config --repo-resolve ${{ env.PYTHON_REPO }} --server-id-resolve art1
+
+      - name: Install dependencies
+        run: jfrog rt pip-install -r src/requirements.txt --no-cache-dir  --build-name=$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER --module=python_deps
+
+      - name: Package and upload webapp
+        run: |
+          tar -czvf webapp_python.tar.gz src/*.yaml src/*.txt src/*.py
+          jfrog rt upload webapp_python.tar.gz ${{ env.GENERIC_REPO }} --build-name $JFROG_CLI_BUILD_NAME --build-number $JFROG_CLI_BUILD_NUMBER
+
+      - name: Publish Build Info
+        run: |
+          # Collect environment variables for the build
+          jfrog rt bce $JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+          # Collect VCS details from git and add them to the build
+          jfrog rt bag $JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+          # Publish build info
+          jfrog rt bp $JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
