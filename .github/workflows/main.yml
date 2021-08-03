@@ -62,3 +62,6 @@ jobs:
 
       - name: Set properties
         run: jfrog rt sp --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER ${{ env.GENERIC_REPO }}/ "qa.status=wip"
+
+      - name: Scan Build 
+        run: jfrog rt bs $JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER 
