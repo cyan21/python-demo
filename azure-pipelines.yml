@@ -9,59 +9,61 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- task: ArtifactoryPip@1
-  inputs:
-    artifactoryService: 'yann_swampup'
-    command: 'install'
-    arguments: '-r src/requirements.txt --no-cache-dir'
-    targetResolveRepo: 'urs-python'
-    collectBuildInfo: true
-    buildName: '$(Build.DefinitionName)'
-    buildNumber: '$(Build.BuildNumber)'
-    noPipCache: true
-  displayName: 'Download dependencies'
+jobs:
+- job: azure-python-webapp
+  steps:
+  - task: ArtifactoryPip@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      command: 'install'
+      arguments: '-r src/requirements.txt --no-cache-dir'
+      targetResolveRepo: 'urs-python'
+      collectBuildInfo: true
+      buildName: '$(Build.DefinitionName)'
+      buildNumber: '$(Build.BuildNumber)'
+      noPipCache: true
+    displayName: 'Download dependencies'
 
-- script: tar -czvf webapp_python_azure.tar.gz src/*.yaml src/*.txt src/*.py
-  displayName: 'Package webapp'
-  
-- task: ArtifactoryGenericUpload@2
-  inputs:
-    artifactoryService: 'yann_swampup'
-    specSource: 'taskConfiguration'
-    fileSpec: |
-      {
-        "files": [
-          {
-            "pattern": "webapp_python_azure.tar.gz",
-            "target": "urs-generic/"
-          }
-        ]
-      }
-    collectBuildInfo: true
-    buildName: '$(Build.DefinitionName)'
-    buildNumber: '$(Build.BuildNumber)'
-    failNoOp: true
-  displayName: 'Upload webapp'
+  - script: tar -czvf webapp_python_azure.tar.gz src/*.yaml src/*.txt src/*.py
+    displayName: 'Package webapp'
+    
+  - task: ArtifactoryGenericUpload@2
+    inputs:
+      artifactoryService: 'yann_swampup'
+      specSource: 'taskConfiguration'
+      fileSpec: |
+        {
+          "files": [
+            {
+              "pattern": "webapp_python_azure.tar.gz",
+              "target": "urs-generic/"
+            }
+          ]
+        }
+      collectBuildInfo: true
+      buildName: '$(Build.DefinitionName)'
+      buildNumber: '$(Build.BuildNumber)'
+      failNoOp: true
+    displayName: 'Upload webapp'
 
-- task: ArtifactoryPublishBuildInfo@1
-  inputs:
-    artifactoryService: 'yann_swampup'
-    buildName: '$(Build.DefinitionName)'
-    buildNumber: '$(Build.BuildNumber)'
-  displayName: 'Publish Build Info'
+  - task: ArtifactoryPublishBuildInfo@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      buildName: '$(Build.DefinitionName)'
+      buildNumber: '$(Build.BuildNumber)'
+    displayName: 'Publish Build Info'
 
-- task: ArtifactoryXrayScan@1
-  inputs:
-    artifactoryService: 'yann_swampup'
-    buildName: '$(Build.DefinitionName)'
-    buildNumber: '$(Build.BuildNumber)'
-    allowFailBuild: true
-  displayName: 'Scan Build Info'
+  - task: ArtifactoryXrayScan@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      buildName: '$(Build.DefinitionName)'
+      buildNumber: '$(Build.BuildNumber)'
+      allowFailBuild: true
+    displayName: 'Scan Build Info'
 
 
-#- script: |
-#    echo Add other tasks to build, test, and deploy your project.
-#    echo See https://aka.ms/yaml
-#    jfrog rt upload webapp_python.tar.gz ${{ env.GENERIC_REPO }} --target-props "maturity=release-candidate;platform=windows,linux;qa.status=ready" --build-name $JFROG_CLI_BUILD_NAME --build-number $JFROG_CLI_BUILD_NUMBER --module=python_webapp     
-#  displayName: 'Run a multi-line script'
+  #- script: |
+  #    echo Add other tasks to build, test, and deploy your project.
+  #    echo See https://aka.ms/yaml
+  #    jfrog rt upload webapp_python.tar.gz ${{ env.GENERIC_REPO }} --target-props "maturity=release-candidate;platform=windows,linux;qa.status=ready" --build-name $JFROG_CLI_BUILD_NAME --build-number $JFROG_CLI_BUILD_NUMBER --module=python_webapp     
+  #  displayName: 'Run a multi-line script'
