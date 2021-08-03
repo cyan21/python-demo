@@ -10,7 +10,7 @@ pool:
   vmImage: ubuntu-latest
 
 jobs:
-- job: azure-python-webapp
+- job: azure_python_webapp
   steps:
   - task: ArtifactoryPip@1
     inputs:
