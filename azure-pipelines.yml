@@ -49,6 +49,16 @@ steps:
     artifactoryService: 'yann_swampup'
     buildName: '$(Build.DefinitionName)'
     buildNumber: '$(Build.BuildNumber)'
+  displayName: 'Publish Build Info'
+
+- task: ArtifactoryXrayScan@1
+  inputs:
+    artifactoryService: 'yann_swampup'
+    buildName: '$(Build.DefinitionName)'
+    buildNumber: '$(Build.BuildNumber)'
+    allowFailBuild: true
+  displayName: 'Scan Build Info'
+
 
 #- script: |
 #    echo Add other tasks to build, test, and deploy your project.
