@@ -76,7 +76,7 @@ jobs:
           "files": [
             {
               "pattern": "urs-generic/webapp_python_azure.tar.gz",
-              "target": "webapp_python_azure.tar.gz"
+              "target": "src/webapp_python.tar.gz"
             }
           ]
         }
@@ -84,10 +84,11 @@ jobs:
       buildName: '$(Build.DefinitionName)'
       buildNumber: '$(Build.BuildNumber)'
       failNoOp: true
+    displayName: 'Download webapp'
 
   - script: |
       docker images
-      ls -l
+      ls -l src
     displayName: 'Check up '
 
   - task: Docker@2
@@ -96,6 +97,7 @@ jobs:
       repository: 'urs-docker'
       command: 'build'
       Dockerfile: 'src/Dockerfile'
+      arguments: '--build-arg RT_TOKEN=AP5hFq3BfqJMjUsZDJ2yFrKt3aR'
     displayName: 'Build Docker image'
 
   - task: ArtifactoryDocker@1
