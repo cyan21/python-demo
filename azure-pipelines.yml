@@ -105,7 +105,7 @@ jobs:
       command: 'push'
       artifactoryService: 'yann_swampup'
       targetRepo: 'urs-docker'
-      imageName: 'azure-python-webapp:1.0.0'
+      imageName: 'yann-swampup.dev.aws.devopsacc.team/urs-docker/azure-python-webapp:1.0.0'
       collectBuildInfo: true
       buildName: '$(Build.DefinitionName)'
       buildNumber: '$(Build.BuildNumber)'
