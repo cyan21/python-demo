@@ -103,7 +103,7 @@ jobs:
           "files": [
             {
               "pattern": "urs-generic/",
-              "props" : "version=$(APP_VERSION)"
+              "props" : "version=$(APP_VERSION)",
               "target": "src/webapp_python.tar.gz"
             }
           ]
