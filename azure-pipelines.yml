@@ -43,12 +43,13 @@ jobs:
           "files": [
             {
               "pattern": "src/webapp_python_azure_$(Build.SourceVersion).tar.gz",
-              "target": "$(TARGET_REPO)/"
+              "target": "${TARGET_REPO}/"
             }
           ]
         }
+      # showing off placeholder in FileSpec (not mandatory ...)
       replaceSpecVars: true
-      specVars: 'TARGET_REPO=$(GENERIC_REPO)'
+      specVars: TARGET_REPO=$(GENERIC_REPO)
       collectBuildInfo: true
       buildName: '$(Build.DefinitionName)'
       buildNumber: '$(Build.BuildNumber)'
@@ -80,7 +81,7 @@ jobs:
         {
           "files": [
             {
-              "pattern": "urs-generic/webapp_python_azure_$(Build.SourceVersion).tar.gz"
+              "pattern": "$(GENERIC_REPO)/webapp_python_azure_$(Build.SourceVersion).tar.gz"
             }
           ]
         }
