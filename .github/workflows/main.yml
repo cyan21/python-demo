@@ -75,7 +75,7 @@ jobs:
 
       - name: Download webapp
         run: |
-          jfrog rt download --build $JFROG_CLI_BUILD_NAME/11  ${{ env.GENERIC_REPO }} webapp_python.tar.gz
+          jfrog rt download --build $JFROG_CLI_BUILD_NAME/11  ${{ env.GENERIC_REPO }} src/webapp_python.tar.gz
 
       - name: Docker Login
         uses: docker/login-action@v1.10.0
