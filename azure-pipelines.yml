@@ -96,8 +96,7 @@ jobs:
       containerRegistry: 'yann_swampup_docker'
       repository: 'urs-docker'
       command: 'build'
-      Dockerfile: 'Dockerfile'
-      buildContext: 'src'
+      Dockerfile: 'src/Dockerfile'
       arguments: '-t yann-swampup.dev.aws.devopsacc.team/urs-docker/azure-python-webapp:1.0.0--build-arg RT_TOKEN=AP5hFq3BfqJMjUsZDJ2yFrKt3aR'
     displayName: 'Build Docker image'
 
