@@ -63,13 +63,13 @@ jobs:
       buildNumber: '$(Build.BuildNumber)'
     displayName: 'Publish Build Info'
 
-#   - task: ArtifactoryXrayScan@1
-#     inputs:
-#       artifactoryService: 'yann_swampup'
-#       buildName: '$(Build.DefinitionName)'
-#       buildNumber: '$(Build.BuildNumber)'
-#       allowFailBuild: false
-#     displayName: 'Scan Build Info'
+  - task: ArtifactoryXrayScan@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      buildName: '$(Build.DefinitionName)'
+      buildNumber: '$(Build.BuildNumber)'
+      allowFailBuild: false
+    displayName: 'Scan Build Info'
 
   - task: ArtifactoryProperties@1
     inputs:
@@ -86,62 +86,63 @@ jobs:
           ]
         }
 
-# - job: azure_docker
-#   steps:
-#   - task: DockerInstaller@0
-#     inputs:
-#       dockerVersion: '17.09.0-ce'
-#     displayName: 'Install Docker'
-#   - task: ArtifactoryGenericDownload@3
-#     inputs:
-#       connection: 'yann_swampup'
-#       specSource: 'taskConfiguration'
-#       fileSpec: |
-#         {
-#           "files": [
-#             {
-#               "pattern": "urs-generic/webapp_python_azure.tar.gz",
-#               "target": "src/webapp_python.tar.gz"
-#             }
-#           ]
-#         }
-#       collectBuildInfo: true
-#       buildName: '$(Build.DefinitionName)'
-#       buildNumber: '$(Build.BuildNumber)'
-#       failNoOp: true
-#     displayName: 'Download webapp'
+- job: azure_docker
+  steps:
+  - task: DockerInstaller@0
+    inputs:
+      dockerVersion: '17.09.0-ce'
+    displayName: 'Install Docker'
+  - task: ArtifactoryGenericDownload@3
+    inputs:
+      connection: 'yann_swampup'
+      specSource: 'taskConfiguration'
+      fileSpec: |
+        {
+          "files": [
+            {
+              "pattern": "urs-generic/",
+              "props" : "version=$(APP_VERSION)"
+              "target": "src/webapp_python.tar.gz"
+            }
+          ]
+        }
+      collectBuildInfo: true
+      buildName: '$(Build.DefinitionName)'
+      buildNumber: '$(Build.BuildNumber)'
+      failNoOp: true
+    displayName: 'Download webapp'
 
-#   - script: |
-#       docker images
-#       ls -l src
-#     displayName: 'Check up '
+  - script: |
+      docker images
+      ls -l src
+    displayName: 'Check up '
 
-#   - task: Docker@2
-#     inputs:
-#       containerRegistry: 'yann_swampup_docker'
-#       repository: $(DOCKER_REPO)
-#       command: 'build'
-#       Dockerfile: 'src/Dockerfile'
-#       arguments: '-t $(DOCKER_REG)/$(DOCKER_REPO)/azure-python-webapp:1.0.0 --build-arg RT_TOKEN=AP5hFq3BfqJMjUsZDJ2yFrKt3aR'
-#     displayName: 'Build Docker image'
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'yann_swampup_docker'
+      repository: $(DOCKER_REPO)
+      command: 'build'
+      Dockerfile: 'src/Dockerfile'
+      arguments: '-t $(DOCKER_REG)/$(DOCKER_REPO)/azure-python-webapp:$(APP_VERSION) --build-arg RT_TOKEN=$(RT_SECRET)'
+    displayName: 'Build Docker image'
 
-#   - task: ArtifactoryDocker@1
-#     inputs:
-#       command: 'push'
-#       artifactoryService: 'yann_swampup'
-#       targetRepo: $(DOCKER_REPO)
-#       imageName: '$(DOCKER_REG)/$(DOCKER_REPO)/azure-python-webapp:1.0.0'
-#       collectBuildInfo: true
-#       buildName: '$(Build.DefinitionName)'
-#       buildNumber: '$(Build.BuildNumber)'
-#       includeEnvVars: true
-#     displayName: 'Push Docker image'
+  - task: ArtifactoryDocker@1
+    inputs:
+      command: 'push'
+      artifactoryService: 'yann_swampup'
+      targetRepo: $(DOCKER_REPO)
+      imageName: '$(DOCKER_REG)/$(DOCKER_REPO)/azure-python-webapp:$(APP_VERSION)'
+      collectBuildInfo: true
+      buildName: '$(Build.DefinitionName)'
+      buildNumber: '$(Build.BuildNumber)'
+      includeEnvVars: true
+    displayName: 'Push Docker image'
 
-#   - task: ArtifactoryPublishBuildInfo@1
-#     inputs:
-#       artifactoryService: 'yann_swampup'
-#       buildName: '$(Build.DefinitionName)'
-#       buildNumber: '$(Build.BuildNumber)'
-#     displayName: 'Publish Build Info'
+  - task: ArtifactoryPublishBuildInfo@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      buildName: '$(Build.DefinitionName)'
+      buildNumber: '$(Build.BuildNumber)'
+    displayName: 'Publish Build Info'
 
 
