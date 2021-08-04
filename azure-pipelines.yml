@@ -17,7 +17,7 @@ pool:
   vmImage: ubuntu-latest
 
 jobs:
-- job: azure_python_webapp
+- job: python_webapp
   steps:
   - task: ArtifactoryPip@1
     inputs:
@@ -86,7 +86,9 @@ jobs:
           ]
         }
 
-- job: azure_docker
+- job: python_docker
+  dependsOn:
+  - python_webapp
   steps:
   - task: DockerInstaller@0
     inputs:
