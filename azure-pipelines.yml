@@ -10,56 +10,56 @@ pool:
   vmImage: ubuntu-latest
 
 jobs:
-- job: azure_python_webapp
-  steps:
-  - task: ArtifactoryPip@1
-    inputs:
-      artifactoryService: 'yann_swampup'
-      command: 'install'
-      arguments: '-r src/requirements.txt --no-cache-dir'
-      targetResolveRepo: 'urs-python'
-      collectBuildInfo: true
-      buildName: '$(Build.DefinitionName)'
-      buildNumber: '$(Build.BuildNumber)'
-      noPipCache: true
-    displayName: 'Download dependencies'
+# - job: azure_python_webapp
+#   steps:
+#   - task: ArtifactoryPip@1
+#     inputs:
+#       artifactoryService: 'yann_swampup'
+#       command: 'install'
+#       arguments: '-r src/requirements.txt --no-cache-dir'
+#       targetResolveRepo: 'urs-python'
+#       collectBuildInfo: true
+#       buildName: '$(Build.DefinitionName)'
+#       buildNumber: '$(Build.BuildNumber)'
+#       noPipCache: true
+#     displayName: 'Download dependencies'
 
-  - script: cd src && tar -czvf webapp_python_azure.tar.gz *.yaml *.txt *.py
-    displayName: 'Package webapp'
+#   - script: cd src && tar -czvf webapp_python_azure.tar.gz *.yaml *.txt *.py
+#     displayName: 'Package webapp'
     
-  - task: ArtifactoryGenericUpload@2
-    inputs:
-      artifactoryService: 'yann_swampup'
-      specSource: 'taskConfiguration'
-      fileSpec: |
-        {
-          "files": [
-            {
-              "pattern": "src/webapp_python_azure.tar.gz",
-              "target": "urs-generic/"
-            }
-          ]
-        }
-      collectBuildInfo: true
-      buildName: '$(Build.DefinitionName)'
-      buildNumber: '$(Build.BuildNumber)'
-      failNoOp: true
-    displayName: 'Upload webapp'
+#   - task: ArtifactoryGenericUpload@2
+#     inputs:
+#       artifactoryService: 'yann_swampup'
+#       specSource: 'taskConfiguration'
+#       fileSpec: |
+#         {
+#           "files": [
+#             {
+#               "pattern": "src/webapp_python_azure.tar.gz",
+#               "target": "urs-generic/"
+#             }
+#           ]
+#         }
+#       collectBuildInfo: true
+#       buildName: '$(Build.DefinitionName)'
+#       buildNumber: '$(Build.BuildNumber)'
+#       failNoOp: true
+#     displayName: 'Upload webapp'
 
-  - task: ArtifactoryPublishBuildInfo@1
-    inputs:
-      artifactoryService: 'yann_swampup'
-      buildName: '$(Build.DefinitionName)'
-      buildNumber: '$(Build.BuildNumber)'
-    displayName: 'Publish Build Info'
+#   - task: ArtifactoryPublishBuildInfo@1
+#     inputs:
+#       artifactoryService: 'yann_swampup'
+#       buildName: '$(Build.DefinitionName)'
+#       buildNumber: '$(Build.BuildNumber)'
+#     displayName: 'Publish Build Info'
 
-  - task: ArtifactoryXrayScan@1
-    inputs:
-      artifactoryService: 'yann_swampup'
-      buildName: '$(Build.DefinitionName)'
-      buildNumber: '$(Build.BuildNumber)'
-      allowFailBuild: false
-    displayName: 'Scan Build Info'
+#   - task: ArtifactoryXrayScan@1
+#     inputs:
+#       artifactoryService: 'yann_swampup'
+#       buildName: '$(Build.DefinitionName)'
+#       buildNumber: '$(Build.BuildNumber)'
+#       allowFailBuild: false
+#     displayName: 'Scan Build Info'
 
 - job: azure_docker
   steps:
