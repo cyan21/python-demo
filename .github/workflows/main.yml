@@ -78,7 +78,7 @@ jobs:
       JFROG_BUILD_STATUS: PASS
       DOCKER_REG: yann-swampup.dev.aws.devopsacc.team
       DOCKER_REPO: urs-docker
-      DOCKER_USER: admin
+      DOCKER_USER: ci_read
     steps:
       - uses: actions/checkout@v2
 
