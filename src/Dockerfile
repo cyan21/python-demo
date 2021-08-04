@@ -1,11 +1,22 @@
-FROM swampup301.jfrog.io/urs-docker/python:3.9.5-slim-buster
+ARG REGISTRY=yann-swampup.dev.aws.devopsacc.team
+ARG DOCKER_REPO=urs-docker
+
+FROM $REGISTRY/$DOCKER_REPO/python:3.9.5-slim-buster
+
+ARG PYTHON_REPO=urs-python
+ARG RT_USER=ci_read
+ARG RT_TOKEN
+
+# https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
+ARG REGISTRY
 
 WORKDIR  /var/opt/webapp
 
 RUN mkdir -p /var/opt/webapp
-ADD webapp_python.tar.gz . 
-RUN pip config set global.index-url https://swampup301.jfrog.io/artifactory/api/pypi/urs-python/simple && \
-    pip install -r requirements.txt
+ADD webapp_python.tar.gz .
+RUN ls -l
+RUN pip config set global.index-url https://${RT_USER}:${RT_TOKEN}@${REGISTRY}/artifactory/api/pypi/${PYTHON_REPO}/simple && \
+    pip install -r requirements.txt --trusted-host ${REGISTRY}
 
 EXPOSE 8080
 
