@@ -52,8 +52,8 @@ jobs:
 
       - name: Package and upload webapp
         run: |
-          tar -czvf webapp_python_gha_${{ env.GITHUB_SHA }}.tar.gz src/*.yaml src/*.txt src/*.py
-          jfrog rt upload webapp_python_gha_${{ env.GITHUB_SHA }}.tar.gz ${{ env.GENERIC_REPO }} --target-props "maturity=release-candidate;platform=windows,linux;qa.status=ready" --build-name $JFROG_CLI_BUILD_NAME --build-number $JFROG_CLI_BUILD_NUMBER --module=python_webapp
+          tar -czvf webapp_python_gha_${{ github.sha }}.tar.gz src/*.yaml src/*.txt src/*.py
+          jfrog rt upload webapp_python_gha_${{ github.sha }}.tar.gz ${{ env.GENERIC_REPO }} --target-props "maturity=release-candidate;platform=windows,linux;qa.status=ready" --build-name $JFROG_CLI_BUILD_NAME --build-number $JFROG_CLI_BUILD_NUMBER --module=python_webapp
         
       - name: Publish Build Info
         run: |
@@ -65,14 +65,18 @@ jobs:
           jfrog rt bp
 
       - name: Set properties
-        run: jfrog rt sp --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER ${{ env.GENERIC_REPO }}/ "qa.status=wip"
+        run: jfrog rt sp --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER ${{ env.GENERIC_REPO }}/ "qa.status=wip;version=${{ env.APP_VERSION }}"
 
       - name: Scan Build 
-        run: jfrog rt bs
+        run: jfrog rt bs --fail=false
 
       - name: Promote Build 
         run: jfrog rt bpr  --comment "promoted to the next level"
-        
+
+      - name: Download webapp
+        run: |
+          jfrog rt download --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER  ${{ env.GENERIC_REPO }} 
+
       - name: Docker Login
         uses: docker/login-action@v1.10.0
         with:
