@@ -77,6 +77,7 @@ jobs:
       JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
       APP_VERSION: 2.0.0
       JFROG_BUILD_STATUS: PASS
+      GENERIC_REPO: urs-generic
       DOCKER_REG: yann-swampup.dev.aws.devopsacc.team
       DOCKER_REPO: urs-docker
       DOCKER_USER: ci_read
