@@ -52,7 +52,7 @@ jobs:
 
       - name: Package and upload webapp
         run: |
-          tar -czvf webapp_python.tar.gz src/*.yaml src/*.txt src/*.py
+          tar -czvf webapp_python_gha_${{ env.GITHUB_SHA }}.tar.gz src/*.yaml src/*.txt src/*.py
           jfrog rt upload webapp_python_gha_${{ env.GITHUB_SHA }}.tar.gz ${{ env.GENERIC_REPO }} --target-props "maturity=release-candidate;platform=windows,linux;qa.status=ready" --build-name $JFROG_CLI_BUILD_NAME --build-number $JFROG_CLI_BUILD_NUMBER --module=python_webapp
         
       - name: Publish Build Info
