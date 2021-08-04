@@ -4,7 +4,9 @@
 # https://aka.ms/yaml
 variables:
   RT_SECRET: $(RT_TOKEN)
+  APP_VERSION: 1.0.0
   PYTHON_REPO: urs-python
+  GENERIC_REPO: urs-generic
   DOCKER_REG: yann-swampup.dev.aws.devopsacc.team
   DOCKER_REPO: urs-docker
 
@@ -15,48 +17,50 @@ pool:
   vmImage: ubuntu-latest
 
 jobs:
-# - job: azure_python_webapp
-#   steps:
-#   - task: ArtifactoryPip@1
-#     inputs:
-#       artifactoryService: 'yann_swampup'
-#       command: 'install'
-#       arguments: '-r src/requirements.txt --no-cache-dir'
-#       targetResolveRepo: $(PYTHON_REPO)
-#       collectBuildInfo: true
-#       buildName: '$(Build.DefinitionName)'
-#       buildNumber: '$(Build.BuildNumber)'
-#       noPipCache: true
-#     displayName: 'Download dependencies'
+- job: azure_python_webapp
+  steps:
+  - task: ArtifactoryPip@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      command: 'install'
+      arguments: '-r src/requirements.txt --no-cache-dir'
+      targetResolveRepo: $(PYTHON_REPO)
+      collectBuildInfo: true
+      buildName: '$(Build.DefinitionName)'
+      buildNumber: '$(Build.BuildNumber)'
+      noPipCache: true
+    displayName: 'Download dependencies'
 
-#   - script: cd src && tar -czvf webapp_python_azure.tar.gz *.yaml *.txt *.py
-#     displayName: 'Package webapp'
+  - script: cd src && tar -czvf webapp_python_azure_$(Build.SourceVersion).tar.gz *.yaml *.txt *.py
+    displayName: 'Package webapp'
     
-#   - task: ArtifactoryGenericUpload@2
-#     inputs:
-#       artifactoryService: 'yann_swampup'
-#       specSource: 'taskConfiguration'
-#       fileSpec: |
-#         {
-#           "files": [
-#             {
-#               "pattern": "src/webapp_python_azure.tar.gz",
-#               "target": "urs-generic/"
-#             }
-#           ]
-#         }
-#       collectBuildInfo: true
-#       buildName: '$(Build.DefinitionName)'
-#       buildNumber: '$(Build.BuildNumber)'
-#       failNoOp: true
-#     displayName: 'Upload webapp'
+  - task: ArtifactoryGenericUpload@2
+    inputs:
+      artifactoryService: 'yann_swampup'
+      specSource: 'taskConfiguration'
+      fileSpec: |
+        {
+          "files": [
+            {
+              "pattern": "src/webapp_python_azure_$(Build.SourceVersion).tar.gz",
+              "target": "$(TARGET_REPO)/"
+            }
+          ]
+        }
+      replaceSpecVars: true
+      specVars: 'TARGET_REPO=$(GENERIC_REPO)'
+      collectBuildInfo: true
+      buildName: '$(Build.DefinitionName)'
+      buildNumber: '$(Build.BuildNumber)'
+      failNoOp: true
+    displayName: 'Upload webapp'
 
-#   - task: ArtifactoryPublishBuildInfo@1
-#     inputs:
-#       artifactoryService: 'yann_swampup'
-#       buildName: '$(Build.DefinitionName)'
-#       buildNumber: '$(Build.BuildNumber)'
-#     displayName: 'Publish Build Info'
+  - task: ArtifactoryPublishBuildInfo@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      buildName: '$(Build.DefinitionName)'
+      buildNumber: '$(Build.BuildNumber)'
+    displayName: 'Publish Build Info'
 
 #   - task: ArtifactoryXrayScan@1
 #     inputs:
@@ -66,62 +70,77 @@ jobs:
 #       allowFailBuild: false
 #     displayName: 'Scan Build Info'
 
-- job: azure_docker
-  steps:
-  - task: DockerInstaller@0
+  - task: ArtifactoryProperties@1
     inputs:
-      dockerVersion: '17.09.0-ce'
-    displayName: 'Install Docker'
-  - task: ArtifactoryGenericDownload@3
-    inputs:
-      connection: 'yann_swampup'
+      command: 'set'
+      artifactoryService: 'yann_swampup'
+      setProps: 'version=$(APP_VERSION)'
       specSource: 'taskConfiguration'
       fileSpec: |
         {
           "files": [
             {
-              "pattern": "urs-generic/webapp_python_azure.tar.gz",
-              "target": "src/webapp_python.tar.gz"
+              "pattern": "urs-generic/webapp_python_azure_$(Build.SourceVersion).tar.gz"
             }
           ]
         }
-      collectBuildInfo: true
-      buildName: '$(Build.DefinitionName)'
-      buildNumber: '$(Build.BuildNumber)'
-      failNoOp: true
-    displayName: 'Download webapp'
 
-  - script: |
-      docker images
-      ls -l src
-    displayName: 'Check up '
+# - job: azure_docker
+#   steps:
+#   - task: DockerInstaller@0
+#     inputs:
+#       dockerVersion: '17.09.0-ce'
+#     displayName: 'Install Docker'
+#   - task: ArtifactoryGenericDownload@3
+#     inputs:
+#       connection: 'yann_swampup'
+#       specSource: 'taskConfiguration'
+#       fileSpec: |
+#         {
+#           "files": [
+#             {
+#               "pattern": "urs-generic/webapp_python_azure.tar.gz",
+#               "target": "src/webapp_python.tar.gz"
+#             }
+#           ]
+#         }
+#       collectBuildInfo: true
+#       buildName: '$(Build.DefinitionName)'
+#       buildNumber: '$(Build.BuildNumber)'
+#       failNoOp: true
+#     displayName: 'Download webapp'
 
-  - task: Docker@2
-    inputs:
-      containerRegistry: 'yann_swampup_docker'
-      repository: $(DOCKER_REPO)
-      command: 'build'
-      Dockerfile: 'src/Dockerfile'
-      arguments: '-t $(DOCKER_REG)/$(DOCKER_REPO)/azure-python-webapp:1.0.0 --build-arg RT_TOKEN=AP5hFq3BfqJMjUsZDJ2yFrKt3aR'
-    displayName: 'Build Docker image'
+#   - script: |
+#       docker images
+#       ls -l src
+#     displayName: 'Check up '
 
-  - task: ArtifactoryDocker@1
-    inputs:
-      command: 'push'
-      artifactoryService: 'yann_swampup'
-      targetRepo: $(DOCKER_REPO)
-      imageName: '$(DOCKER_REG)/$(DOCKER_REPO)/azure-python-webapp:1.0.0'
-      collectBuildInfo: true
-      buildName: '$(Build.DefinitionName)'
-      buildNumber: '$(Build.BuildNumber)'
-      includeEnvVars: true
-    displayName: 'Push Docker image'
+#   - task: Docker@2
+#     inputs:
+#       containerRegistry: 'yann_swampup_docker'
+#       repository: $(DOCKER_REPO)
+#       command: 'build'
+#       Dockerfile: 'src/Dockerfile'
+#       arguments: '-t $(DOCKER_REG)/$(DOCKER_REPO)/azure-python-webapp:1.0.0 --build-arg RT_TOKEN=AP5hFq3BfqJMjUsZDJ2yFrKt3aR'
+#     displayName: 'Build Docker image'
 
-  - task: ArtifactoryPublishBuildInfo@1
-    inputs:
-      artifactoryService: 'yann_swampup'
-      buildName: '$(Build.DefinitionName)'
-      buildNumber: '$(Build.BuildNumber)'
-    displayName: 'Publish Build Info'
+#   - task: ArtifactoryDocker@1
+#     inputs:
+#       command: 'push'
+#       artifactoryService: 'yann_swampup'
+#       targetRepo: $(DOCKER_REPO)
+#       imageName: '$(DOCKER_REG)/$(DOCKER_REPO)/azure-python-webapp:1.0.0'
+#       collectBuildInfo: true
+#       buildName: '$(Build.DefinitionName)'
+#       buildNumber: '$(Build.BuildNumber)'
+#       includeEnvVars: true
+#     displayName: 'Push Docker image'
+
+#   - task: ArtifactoryPublishBuildInfo@1
+#     inputs:
+#       artifactoryService: 'yann_swampup'
+#       buildName: '$(Build.DefinitionName)'
+#       buildNumber: '$(Build.BuildNumber)'
+#     displayName: 'Publish Build Info'
 
 
