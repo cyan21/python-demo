@@ -9,6 +9,8 @@ variables:
   GENERIC_REPO: urs-generic
   DOCKER_REG: yann-swampup.dev.aws.devopsacc.team
   DOCKER_REPO: urs-docker
+  BUILD_INFO_WEBAPP: $(Build.DefinitionName)-ado
+  BUILD_INFO_DOCKER: docker-$(Build.DefinitionName)-ado
 
 trigger:
 - main
@@ -26,7 +28,7 @@ jobs:
       arguments: '-r src/requirements.txt --no-cache-dir'
       targetResolveRepo: $(PYTHON_REPO)
       collectBuildInfo: true
-      buildName: '$(Build.DefinitionName)'
+      buildName: $(BUILD_INFO_WEBAPP)
       buildNumber: '$(Build.BuildNumber)'
       noPipCache: true
     displayName: 'Download dependencies'
@@ -51,7 +53,7 @@ jobs:
       replaceSpecVars: true
       specVars: TARGET_REPO=$(GENERIC_REPO)
       collectBuildInfo: true
-      buildName: '$(Build.DefinitionName)'
+      buildName: $(BUILD_INFO_WEBAPP)
       buildNumber: '$(Build.BuildNumber)'
       failNoOp: true
     displayName: 'Upload webapp'
@@ -59,14 +61,14 @@ jobs:
   - task: ArtifactoryPublishBuildInfo@1
     inputs:
       artifactoryService: 'yann_swampup'
-      buildName: '$(Build.DefinitionName)'
+      buildName: $(BUILD_INFO_WEBAPP)
       buildNumber: '$(Build.BuildNumber)'
     displayName: 'Publish Build Info'
 
   - task: ArtifactoryXrayScan@1
     inputs:
       artifactoryService: 'yann_swampup'
-      buildName: '$(Build.DefinitionName)'
+      buildName: $(BUILD_INFO_WEBAPP)
       buildNumber: '$(Build.BuildNumber)'
       allowFailBuild: false
     displayName: 'Scan Build Info'
@@ -85,6 +87,21 @@ jobs:
             }
           ]
         }
+    displayName: 'Set properties'
+
+  - task: ArtifactoryBuildPromotion@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      buildName: $(BUILD_INFO_WEBAPP)
+      buildNumber: '$(Build.BuildNumber)'
+      targetRepo: 'urs-generic-release-local'
+      status: 'XRAY_SCAN_OK'
+      comment: 'passed Xray Scan'
+      sourceRepo: 'urs-generic-dev-local'
+      includeDependencies: false
+      copy: false
+      dryRun: false
+    displayName: 'Promote Build Info'
 
 - job: python_docker
   dependsOn:
@@ -102,14 +119,14 @@ jobs:
         {
           "files": [
             {
-              "pattern": "urs-generic/",
+              "pattern": "$(GENERIC_REPO)/",
               "props" : "version=$(APP_VERSION)",
               "target": "src/webapp_python.tar.gz"
             }
           ]
         }
       collectBuildInfo: true
-      buildName: '$(Build.DefinitionName)'
+      buildName: $(BUILD_INFO_DOCKER)
       buildNumber: '$(Build.BuildNumber)'
       failNoOp: true
     displayName: 'Download webapp'
@@ -135,7 +152,7 @@ jobs:
       targetRepo: $(DOCKER_REPO)
       imageName: '$(DOCKER_REG)/$(DOCKER_REPO)/azure-python-webapp:$(APP_VERSION)'
       collectBuildInfo: true
-      buildName: '$(Build.DefinitionName)'
+      buildName: $(BUILD_INFO_DOCKER)
       buildNumber: '$(Build.BuildNumber)'
       includeEnvVars: true
     displayName: 'Push Docker image'
@@ -143,8 +160,28 @@ jobs:
   - task: ArtifactoryPublishBuildInfo@1
     inputs:
       artifactoryService: 'yann_swampup'
-      buildName: '$(Build.DefinitionName)'
+      buildName: $(BUILD_INFO_DOCKER)
       buildNumber: '$(Build.BuildNumber)'
-    displayName: 'Publish Build Info'
+    displayName: 'Publish Docker Build Info'
 
+  - task: ArtifactoryXrayScan@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      buildName: $(BUILD_INFO_DOCKER)
+      buildNumber: '$(Build.BuildNumber)'
+      allowFailBuild: false
+    displayName: 'Scan Docker Build Info'
 
+  - task: ArtifactoryBuildPromotion@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      buildName: $(BUILD_INFO_DOCKER)
+      buildNumber: '$(Build.BuildNumber)'
+      targetRepo: 'urs-docker-release-local'
+      status: 'XRAY_SCAN_OK'
+      comment: 'passed Xray Scan'
+      sourceRepo: 'urs-docker-dev-local'
+      includeDependencies: false
+      copy: false
+      dryRun: false
+    displayName: 'Promote Docker Build Info'
