@@ -24,7 +24,7 @@ jobs:
   - task: JfrogCli@1
     inputs:
       artifactoryService: 'yann_swampup'
-      command: 'jfrog --version'
+      command: 'jfrog xr curl -XGET /api/v1/system/version'
     displayName: 'Test version'
 
   - task: ArtifactoryPip@1
