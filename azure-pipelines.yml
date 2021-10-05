@@ -21,6 +21,12 @@ pool:
 jobs:
 - job: python_webapp
   steps:
+  - task: JfrogCli@1
+    inputs:
+      artifactoryService: 'yann_swampup'
+      command: 'jfrog --version'
+    displayName: 'Test version'
+
   - task: ArtifactoryPip@1
     inputs:
       artifactoryService: 'yann_swampup'
