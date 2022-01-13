@@ -3,7 +3,7 @@ pipelines:
     configuration:
       environmentVariables:
         readOnly:
-          dockerRepo: swampup301.jfrog.io/urs-docker
+          dockerRepo: yann-sbx.dev.gcp.devopsacc.team/urs-docker
           pythonRepo: urs-python
           genericRepo: urs-generic
           genericPromotionRepo: urs-generic-release-local
@@ -31,18 +31,18 @@ pipelines:
             - name: artifactory_eu
         execution:
           onStart:
-            - jfrog --version 
+            - jf --version 
             - echo toto 
             - cd ${res_src_code_webapp_python_resourcePath}/src && ls -l
             - git branch
-            - jfrog config add --url=${int_artifactory_eu_url%/artifactory} --user="${int_artifactory_eu_user}" --apikey=${int_artifactory_eu_apikey} --interactive=false  art1 && jfrog config show
-            - jfrog rt pip-config --repo-resolve ${pythonRepo} --server-id-resolve art1
+            - jf config add --url=${int_artifactory_eu_url%/artifactory} --user="${int_artifactory_eu_user}" --apikey=${int_artifactory_eu_apikey} --interactive=false  art1 && jfrog config show
+            - jf rt pip-config --repo-resolve ${pythonRepo} --server-id-resolve art1
           onExecute:
-            - jfrog rt pip-install -r requirements.txt --no-cache-dir  --build-name=${res_bi_webapp_python_buildName} --build-number=${run_number} --module=python_deps
+            - jf pip install -r requirements.txt --no-cache-dir  --build-name=${res_bi_webapp_python_buildName} --build-number=${run_number} --module=python_deps
             - tar -czvf webapp_python.tar.gz *.yaml *.txt *.py
-            - jfrog rt upload webapp_python.tar.gz ${genericRepo} --build-name ${res_bi_webapp_python_buildName} --build-number ${run_number}
-            - jfrog rt bce ${res_bi_webapp_python_buildName} ${run_number}
-            - jfrog rt bp  ${res_bi_webapp_python_buildName} ${run_number}
+            - jf rt upload webapp_python.tar.gz ${genericRepo} --build-name ${res_bi_webapp_python_buildName} --build-number ${run_number}
+            - jf rt bce ${res_bi_webapp_python_buildName} ${run_number}
+            - jf rt bp  ${res_bi_webapp_python_buildName} ${run_number}
           onSuccess:
             - | 
               if [ ${res_src_code_webapp_python_isGitTag} == 'True' ]; then 

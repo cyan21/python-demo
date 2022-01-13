@@ -1,10 +1,10 @@
-ARG REGISTRY=yann-swampup.dev.aws.devopsacc.team
+ARG REGISTRY=yann-sbx.dev.gcp.devopsacc.team
 ARG DOCKER_REPO=urs-docker
 
 FROM $REGISTRY/$DOCKER_REPO/python:3.9.5-slim-buster
 
 ARG PYTHON_REPO=urs-python
-ARG RT_USER=ci_read
+ARG RT_USER=ci
 ARG RT_TOKEN
 
 # https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact
