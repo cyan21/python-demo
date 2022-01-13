@@ -32,6 +32,7 @@ pipelines:
         execution:
           onStart:
             - jfrog --version 
+            - echo toto 
             - cd ${res_src_code_webapp_python_resourcePath}/src && ls -l
             - git branch
             - jfrog config add --url=${int_artifactory_eu_url%/artifactory} --user="${int_artifactory_eu_user}" --apikey=${int_artifactory_eu_apikey} --interactive=false  art1 && jfrog config show
