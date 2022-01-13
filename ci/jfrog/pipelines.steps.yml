@@ -15,15 +15,16 @@ pipelines:
             JFROG_CLI_BUILD_NAME: "{{ gitBranch }}_webapp_python"
             JFROG_CLI_BUILD_URL: "${step_url}${res_src_code_webapp_python_branchName}"
             JFROG_CLI_LOG_LEVEL: DEBUG
-          # runtime:
-          #   type: image
-          #   image:
-          #     custom:
-          #       name: ${dockerRepo}/python-jfrog
-          #       tag: 1.0.0
-          #       ## remove the longest string matching "*/" starting from the left
-          #       # sourceRepository: ${dockerRepo##*/}
-          #       sourceRepository: urs-docker
+          runtime:
+            type: image
+            image:
+              custom:
+                name: ${dockerRepo}/python-jfrog
+                tag: 1.0.0
+                ## remove the longest string matching "*/" starting from the left
+                # sourceRepository: ${dockerRepo##*/}
+                sourceRepository: urs-docker
+                registry: artifactory_docker
           inputResources:
             - name: src_code_webapp_python
             - name: my_runtime_image4
