@@ -1,10 +1,10 @@
 resources:
-  - name: my_runtime_image
+  - name: my_runtime_image2
     type: Image
     configuration:
       registry:  artifactory_docker
       sourceRepository: urs-docker
-      imageName: urs-docker/python-jfrog
+      imageName: python-jfrog
       imageTag: 1.0.0
   - name: src_code_webapp_python
     type: GitRepo
