@@ -26,7 +26,7 @@ pipelines:
           #       sourceRepository: urs-docker
           inputResources:
             - name: src_code_webapp_python
-            - name: my_runtime_image2
+            - name: my_runtime_image3
           outputResources:
             - name: bi_webapp_python
           integrations:
