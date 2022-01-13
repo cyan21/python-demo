@@ -3,8 +3,8 @@ resources:
     type: Image
     configuration:
       registry:  artifactory_docker
-      sourceRepository: yann-sbx.dev.gcp.devopsacc.team/urs-docker
-      imageName: python-jfrog
+      sourceRepository: urs-docker
+      imageName: yann-sbx.dev.gcp.devopsacc.team/python-jfrog
       imageTag: 1.0.0
   - name: src_code_webapp_python
     type: GitRepo
