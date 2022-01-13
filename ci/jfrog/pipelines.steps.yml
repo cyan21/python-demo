@@ -27,7 +27,7 @@ pipelines:
                 registry: artifactory_docker
           inputResources:
             - name: src_code_webapp_python
-            - name: my_runtime_image4
+            # - name: my_runtime_image4
           outputResources:
             - name: bi_webapp_python
           integrations:
