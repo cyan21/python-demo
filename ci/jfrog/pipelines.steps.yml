@@ -20,7 +20,7 @@ pipelines:
             image:
               custom:
                 name: ${dockerRepo}/python-jfrog
-                tag: 3.9.5-slim-buster
+                tag: 1.0.0
                 ## remove the longest string matching "*/" starting from the left
                 sourceRepository: ${dockerRepo##*/}
           inputResources:
