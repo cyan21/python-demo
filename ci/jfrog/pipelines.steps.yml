@@ -51,13 +51,13 @@ pipelines:
               fi
             - echo ${runVarAppVersion}
 
-      - name: scan_webapp_python
-        type: XrayScan
-        configuration:
-          failOnScan: false
-          inputResources:
-            - name: bi_webapp_python
-              trigger: true
+      # - name: scan_webapp_python
+      #   type: XrayScan
+      #   configuration:
+      #     failOnScan: false
+      #     inputResources:
+      #       - name: bi_webapp_python
+      #         trigger: true
 
       - name: promote_bi_webapp_python
         type: PromoteBuild
@@ -68,7 +68,7 @@ pipelines:
           comment: build passed Xray Scan
           copy: false
           inputSteps:
-            - name: scan_webapp_python
+            - name: build_webapp_python
           inputResources:
             - name: bi_webapp_python
           outputResources:
