@@ -13,6 +13,7 @@ pipelines:
         configuration:
           environmentVariables:
             JFROG_CLI_BUILD_NAME: "{{ gitBranch }}_webapp_python"
+            JFROG_CLI_BUILD_NUMBER: ${run_number}
             JFROG_CLI_BUILD_URL: "${step_url}${res_src_code_webapp_python_branchName}"
             JFROG_CLI_LOG_LEVEL: DEBUG
           runtime:
@@ -35,17 +36,17 @@ pipelines:
         execution:
           onStart:
             - jf --version 
-            - echo toto2 
             - cd ${res_src_code_webapp_python_resourcePath}/src && ls -l
             - git branch
-            - jf config add --url=${int_artifactory_eu_url%/artifactory} --user="${int_artifactory_eu_user}" --apikey=${int_artifactory_eu_apikey} --interactive=false  art1 && jfrog config show
-            - jf rt pip-config --repo-resolve ${pythonRepo} --server-id-resolve art1
+            - jf config add --url=${int_artifactory_eu_url%/artifactory} --user="${int_artifactory_eu_user}" --password=${int_artifactory_eu_apikey} --interactive=false  art1 && jf config show
+            - jf pip-config --repo-resolve ${pythonRepo} --server-id-resolve art1
           onExecute:
-            - jf pip install -r requirements.txt --no-cache-dir  --build-name=${res_bi_webapp_python_buildName} --build-number=${run_number} --module=python_deps
+            - jf pip install -r requirements.txt --no-cache-dir --module=python
             - tar -czvf webapp_python.tar.gz *.yaml *.txt *.py
-            - jf rt upload webapp_python.tar.gz ${genericRepo} --build-name ${res_bi_webapp_python_buildName} --build-number ${run_number}
-            - jf rt bce ${res_bi_webapp_python_buildName} ${run_number}
-            - jf rt bp  ${res_bi_webapp_python_buildName} ${run_number}
+            - jf rt upload webapp_python.tar.gz ${genericRepo}  --module=python
+            - jf rt bce 
+            - jf rt bag
+            - jf rt bp  
           onSuccess:
             - | 
               if [ ${res_src_code_webapp_python_isGitTag} == 'True' ]; then 
