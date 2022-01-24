@@ -38,6 +38,10 @@ pipelines:
             - jf --version 
             - cd ${res_src_code_webapp_python_resourcePath}/src && ls -l
             - git branch
+            - echo ${int_artifactory_eu_url}
+            - echo ${int_artifactory_eu_url%/artifactory}
+            - echo ${int_artifactory_eu_user}
+            - echo ${int_artifactory_eu_apikey}
             - jf config add --url=${int_artifactory_eu_url%/artifactory} --user="${int_artifactory_eu_user}" --password=${int_artifactory_eu_apikey} --interactive=false  art1 && jf config show
             - jf pip-config --repo-resolve ${pythonRepo} --server-id-resolve art1
             - cat .jfrog/projects/pip.yaml
