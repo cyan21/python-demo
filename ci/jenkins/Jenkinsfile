@@ -47,7 +47,7 @@ pipeline {
     parameters {
 
         string(name: 'MY_GIT_URL', defaultValue: 'https://github.com/cyan21/python-demo', description: 'DO NOT ADD .git AT THE END')
-        string(name: 'MY_GIT_BRANCH', defaultValue: 'soleng-stg', description: '')
+        string(name: 'MY_GIT_BRANCH', defaultValue: 'main', description: '')
 
         string(name: 'JPD_URL', defaultValue: '', description: 'DO NOT ADD PROTOCOL')
 
@@ -64,7 +64,7 @@ pipeline {
         string(name: 'DOCKER_PROMOTE', defaultValue: 'urs-docker-release-local', description: '')
         booleanParam(name: 'DOCKER_SUB_DOMAIN', defaultValue: false, description: 'false means Docker Repo Path')
         
-        booleanParam(name: 'PYTHON_BUILD', defaultValue: false, description: 'Enable Python Build')
+        booleanParam(name: 'PYTHON_BUILD', defaultValue: true, description: 'Enable Python Build')
         booleanParam(name: 'DOCKER_BUILD', defaultValue: false, description: 'Enable Docker Build')
 
         booleanParam(name: 'FAIL_BUILD', defaultValue: false, description: 'based on Xray scanning result')
@@ -123,14 +123,25 @@ pipeline {
                             serverId: env.ART_ID,
                             repo: params.PYTHON_REPO
                         )
-    
+
+                        // audit dependencies
+                        sh """
+                            curl -fL https://getcli.jfrog.io/v2-jf | sh
+                            ./jf --version
+                            JFROG_CLI_LEVEL=ERROR CI=true ./jf c add  \
+                                --url=https://${params.JPD_URL} \
+                                --user=${ARTY_CREDS_USR}  \
+                                --password="${ARTY_CREDS_PSW}" \
+                            yann-rt
+                            ./jf audit-pip
+                        """
+
                         rtPipInstall (
                             resolverId: "ART_RESOLVER",
                             args: "-r requirements.txt",
-                            module: 'dependencies',
+                            module: 'webapp',
                             buildName: env.MY_BUILD_NAME,
                             buildNumber: env.BUILD_NUMBER
-
                         )
     
                         sh """
@@ -181,53 +192,53 @@ pipeline {
                             buildNumber: env.BUILD_NUMBER
                         )
 
-                        sh """
-                            echo ${env.MY_BUILD_NAME}
-                            if [ ${params.INDEX_BUILD} == "true" ]; then
-                                curl \
-                                    -XPOST \
-                                    -u "${ADM_USER}:${ADM_PASS}" \
-                                    -H "Content-Type: application/json" \
-                                    -d '{"names":["'${env.MY_BUILD_NAME}'"]}' \
-                                https://${params.JPD_URL}/xray/api/v1/binMgr/builds
-                            else
-                                echo "No indexing"
-                            fi 
-                        """
+                        // sh """
+                        //     echo ${env.MY_BUILD_NAME}
+                        //     if [ ${params.INDEX_BUILD} == "true" ]; then
+                        //         curl \
+                        //             -XPOST \
+                        //             -u "${ADM_USER}:${ADM_PASS}" \
+                        //             -H "Content-Type: application/json" \
+                        //             -d '{"names":["'${env.MY_BUILD_NAME}'"]}' \
+                        //         https://${params.JPD_URL}/xray/api/v1/binMgr/builds
+                        //     else
+                        //         echo "No indexing"
+                        //     fi 
+                        // """
                     }
                 }
             }
         }
         
-        stage ('Xray scan') {
-            when {
-                expression {
-                    params.PYTHON_BUILD
-                }
-            }
-            steps {
-                xrayScan (
-                    serverId: env.ART_ID,
-                    buildName: env.MY_BUILD_NAME,
-                    buildNumber: env.BUILD_NUMBER,
-                    failBuild: params.FAIL_BUILD 
-                )
+        // stage ('Xray scan') {
+        //     when {
+        //         expression {
+        //             params.PYTHON_BUILD
+        //         }
+        //     }
+        //     steps {
+        //         xrayScan (
+        //             serverId: env.ART_ID,
+        //             buildName: env.MY_BUILD_NAME,
+        //             buildNumber: env.BUILD_NUMBER,
+        //             failBuild: params.FAIL_BUILD 
+        //         )
 
-                sh """
-                    # workaround to see the scan result in the UI
-                    if [ ${params.INDEX_BUILD} == "true" ]; then
-                        curl \
-                            -XPOST \
-                            -u "${ADM_USER}:${ADM_PASS}" \
-                            -H "Content-Type: application/json" \
-                            -d '{"buildName": "'${env.MY_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
-                        https://${params.JPD_URL}/xray/api/v1/scanBuild
-                    else
-                        echo "No indexing"
-                    fi 
-                """   
-            }
-        }
+        //         sh """
+        //             # workaround to see the scan result in the UI
+        //             if [ ${params.INDEX_BUILD} == "true" ]; then
+        //                 curl \
+        //                     -XPOST \
+        //                     -u "${ADM_USER}:${ADM_PASS}" \
+        //                     -H "Content-Type: application/json" \
+        //                     -d '{"buildName": "'${env.MY_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
+        //                 https://${params.JPD_URL}/xray/api/v1/scanBuild
+        //             else
+        //                 echo "No indexing"
+        //             fi 
+        //         """   
+        //     }
+        // }
         
 
         stage ('Build promotion') {
@@ -300,7 +311,20 @@ pipeline {
                         docker login -u ${ARTY_CREDS_USR} -p ${ARTY_CREDS_PSW} ${env.DOCKER_REGISTRY_URL}
                         docker build --network=host -t ${env.DOCKER_REGISTRY_URL}/jenkins-python-webapp:${params.NEW_VERSION} .
                     """
-                
+
+                    // Audit Docker image
+                    sh """
+                        curl -fL https://getcli.jfrog.io/v2-jf | sh
+                        ./jf --version
+                        ./jf c show
+                        JFROG_CLI_LEVEL=ERROR CI=true ./jf c add  \
+                            --url=https://${params.JPD_URL} \
+                            --user=${ARTY_CREDS_USR}  \
+                            --password="${ARTY_CREDS_PSW}" \
+                        yann-rt
+                        ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}
+                    """
+
                     rtDockerPush(
                         serverId: env.ART_ID,
                         image: "${env.DOCKER_REGISTRY_URL}/jenkins-python-webapp:${params.NEW_VERSION}",

@@ -3,7 +3,7 @@ pipelines:
     configuration:
       environmentVariables:
         readOnly:
-          dockerRepo: swampup301.jfrog.io/urs-docker
+          dockerRepo: yann-sbx.dev.gcp.devopsacc.team/urs-docker
           pythonRepo: urs-python
           genericRepo: urs-generic
           genericPromotionRepo: urs-generic-release-local
@@ -13,6 +13,7 @@ pipelines:
         configuration:
           environmentVariables:
             JFROG_CLI_BUILD_NAME: "{{ gitBranch }}_webapp_python"
+            JFROG_CLI_BUILD_NUMBER: ${run_number}
             JFROG_CLI_BUILD_URL: "${step_url}${res_src_code_webapp_python_branchName}"
             JFROG_CLI_LOG_LEVEL: DEBUG
           runtime:
@@ -20,28 +21,34 @@ pipelines:
             image:
               custom:
                 name: ${dockerRepo}/python-jfrog
-                tag: 3.9.5-slim-buster
+                tag: 1.0.0
                 ## remove the longest string matching "*/" starting from the left
-                sourceRepository: ${dockerRepo##*/}
+                # sourceRepository: ${dockerRepo##*/}
+                sourceRepository: urs-docker
+                registry: artifactory_docker
           inputResources:
             - name: src_code_webapp_python
+            # - name: my_runtime_image4
           outputResources:
             - name: bi_webapp_python
           integrations:
-            - name: artifactory_eu
+            - name: artifactory_docker
+            - name: artifactory_eu 
         execution:
           onStart:
-            - jfrog --version 
+            - jf --version 
             - cd ${res_src_code_webapp_python_resourcePath}/src && ls -l
             - git branch
-            - jfrog config add --url=${int_artifactory_eu_url%/artifactory} --user="${int_artifactory_eu_user}" --apikey=${int_artifactory_eu_apikey} --interactive=false  art1 && jfrog config show
-            - jfrog rt pip-config --repo-resolve ${pythonRepo} --server-id-resolve art1
+            - jf config add --url=${int_artifactory_eu_url%/artifactory} --user="${int_artifactory_eu_user}" --password=${int_artifactory_eu_apikey} --interactive=false  art1 && jf config show
+            - jf pip-config --repo-resolve ${pythonRepo} --server-id-resolve art1
+            - jf c show
           onExecute:
-            - jfrog rt pip-install -r requirements.txt --no-cache-dir  --build-name=${res_bi_webapp_python_buildName} --build-number=${run_number} --module=python_deps
+            - jf pip install -r requirements.txt --no-cache-dir --module=python
             - tar -czvf webapp_python.tar.gz *.yaml *.txt *.py
-            - jfrog rt upload webapp_python.tar.gz ${genericRepo} --build-name ${res_bi_webapp_python_buildName} --build-number ${run_number}
-            - jfrog rt bce ${res_bi_webapp_python_buildName} ${run_number}
-            - jfrog rt bp  ${res_bi_webapp_python_buildName} ${run_number}
+            - jf rt upload webapp_python.tar.gz ${genericRepo}  --module=python
+            - jf rt bce 
+            - jf rt bag
+            - jf rt bp  
           onSuccess:
             - | 
               if [ ${res_src_code_webapp_python_isGitTag} == 'True' ]; then 
@@ -51,13 +58,13 @@ pipelines:
               fi
             - echo ${runVarAppVersion}
 
-      - name: scan_webapp_python
-        type: XrayScan
-        configuration:
-          failOnScan: false
-          inputResources:
-            - name: bi_webapp_python
-              trigger: true
+      # - name: scan_webapp_python
+      #   type: XrayScan
+      #   configuration:
+      #     failOnScan: false
+      #     inputResources:
+      #       - name: bi_webapp_python
+      #         trigger: true
 
       - name: promote_bi_webapp_python
         type: PromoteBuild
@@ -68,7 +75,7 @@ pipelines:
           comment: build passed Xray Scan
           copy: false
           inputSteps:
-            - name: scan_webapp_python
+            - name: build_webapp_python
           inputResources:
             - name: bi_webapp_python
           outputResources:
@@ -97,10 +104,10 @@ pipelines:
       - name: build_webapp_python_docker
         type: DockerBuild
         configuration:
-          # environmentVariables:
-          #   JFROG_CLI_BUILD_NAME: "{{ gitBranch }}_webapp_python_docker"
-          #   JFROG_CLI_BUILD_URL: "${step_url}${res_src_code_webapp_python_branchName}"
-          #   JFROG_CLI_LOG_LEVEL: INFO
+          environmentVariables:
+            JFROG_CLI_BUILD_NAME: "{{ gitBranch }}_webapp_python_docker"
+            JFROG_CLI_BUILD_URL: "${step_url}${res_src_code_webapp_python_branchName}"
+            JFROG_CLI_LOG_LEVEL: INFO
           dockerFileName: Dockerfile
           dockerFileLocation: src
           dockerImageName: ${dockerRepo}/webapp-python-docker
