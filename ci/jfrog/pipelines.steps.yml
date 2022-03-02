@@ -93,7 +93,7 @@ pipelines:
           comment: build passed Xray Scan
           copy: false
           inputSteps:
-            - name: build_webapp_python
+            - name: scan_webapp_python
           inputResources:
             - name: bi_webapp_python
           outputResources:
