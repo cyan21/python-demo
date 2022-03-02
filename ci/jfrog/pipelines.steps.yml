@@ -37,8 +37,9 @@ pipelines:
             - name: artifactory_eu 
         execution:
           onStart:
-            - alias "python=python3"
-            - python3 --version
+            # workaround for the CLI to use the python3 exec
+            - ln -s /usr/bin/python3 /usr/bin/python
+            - python --version
             - pip3 --version
             # - jf --version 
             - jfrog --version 
