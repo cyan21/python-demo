@@ -37,6 +37,7 @@ pipelines:
             - name: artifactory_eu 
         execution:
           onStart:
+            - alias "python=python3"
             - python3 --version
             - pip3 --version
             # - jf --version 
