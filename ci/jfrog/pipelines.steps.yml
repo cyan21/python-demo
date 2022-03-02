@@ -131,6 +131,7 @@ pipelines:
           dockerFileLocation: src
           dockerImageName: ${dockerRepo}/webapp-python-docker
           dockerImageTag: ${runVarAppVersion}
+          dockerOptions: --build-arg RT_USER=${int_artifactory_eu_user} --build-arg RT_TOKEN=${int_artifactory_eu_apikey}
           inputSteps:
               - name: export_variables
           inputResources:
