@@ -39,19 +39,29 @@ pipelines:
           onStart:
             - python3 --version
             - pip3 --version
-            - jf --version 
+            # - jf --version 
+            - jfrog --version 
             - cd ${res_src_code_webapp_python_resourcePath}/src && ls -l
             - git branch
-            - jf config add --url=${int_artifactory_eu_url%/artifactory} --user="${int_artifactory_eu_user}" --password=${int_artifactory_eu_apikey} --interactive=false  art1 && jf config show
-            - jf pip-config --repo-resolve ${pythonRepo} --server-id-resolve art1
-            - jf c show
+            - jfrog rt config add --url=${int_artifactory_eu_url%/artifactory} --user="${int_artifactory_eu_user}" --password=${int_artifactory_eu_apikey} --interactive=false  art1 && jf config show
+            - jfrog rt pip-config --repo-resolve ${pythonRepo} --server-id-resolve art1
+            - jfrog rt c show
+            # - jf config add --url=${int_artifactory_eu_url%/artifactory} --user="${int_artifactory_eu_user}" --password=${int_artifactory_eu_apikey} --interactive=false  art1 && jf config show
+            # - jf pip-config --repo-resolve ${pythonRepo} --server-id-resolve art1
+            # - jf c show
           onExecute:
-            - jf pip install -r requirements.txt --no-cache-dir --module=python
+            - jfrog pip install -r requirements.txt --no-cache-dir --module=python
             - tar -czvf webapp_python.tar.gz *.yaml *.txt *.py
-            - jf rt upload webapp_python.tar.gz ${genericRepo}  --module=python
-            - jf rt bce 
-            - jf rt bag
-            - jf rt bp  
+            - jfrog rt upload webapp_python.tar.gz ${genericRepo}  --module=python
+            - jfrog rt bce 
+            - jfrog rt bag
+            - jfrog rt bp  
+            # - jf pip install -r requirements.txt --no-cache-dir --module=python
+            # - tar -czvf webapp_python.tar.gz *.yaml *.txt *.py
+            # - jf rt upload webapp_python.tar.gz ${genericRepo}  --module=python
+            # - jf rt bce 
+            # - jf rt bag
+            # - jf rt bp  
           onSuccess:
             - | 
               if [ ${res_src_code_webapp_python_isGitTag} == 'True' ]; then 
