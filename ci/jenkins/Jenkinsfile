@@ -133,8 +133,8 @@ pipeline {
                                 --user=${ARTY_CREDS_USR}  \
                                 --password="${ARTY_CREDS_PSW}" \
                             yann-rt
-                            ./jf audit-pip
                         """
+//                             ./jf audit-pip
 
                         rtPipInstall (
                             resolverId: "ART_RESOLVER",
@@ -322,8 +322,8 @@ pipeline {
                             --user=${ARTY_CREDS_USR}  \
                             --password="${ARTY_CREDS_PSW}" \
                         yann-rt
-                        ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}
                     """
+//                         ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}
 
                     rtDockerPush(
                         serverId: env.ART_ID,
