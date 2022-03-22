@@ -376,7 +376,7 @@ pipeline {
                     failBuild: params.FAIL_BUILD 
                 )
 
-                sh """
+                sh """#!/bin/sh
                     # workaround to see the scan result in the UI
                     if [ ${params.INDEX_BUILD} == "true" ]; then
                         curl \
