@@ -310,7 +310,7 @@ pipeline {
                         curl -O https://raw.githubusercontent.com/\${git_path}/${params.MY_GIT_BRANCH}/src/Dockerfile
                         docker login -u ${ARTY_CREDS_USR} -p ${ARTY_CREDS_PSW} ${env.DOCKER_REGISTRY_URL}
                         docker build --network=host \
-			  --build-arg REGISTRY=${parms.JPD_URL} \
+			  --build-arg REGISTRY=${params.JPD_URL} \
 			  --build-arg RT_USER=${ARTY_CREDS_USR} \
 			  --build-arg RT_TOKEN=${ARTY_CREDS_PSW} \
 			  -t ${env.DOCKER_REGISTRY_URL}/jenkins-python-webapp:${params.NEW_VERSION} \
