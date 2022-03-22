@@ -304,7 +304,7 @@ pipeline {
                     )
                     
                     sh """#!/bin/sh
-                        apk add curl openjdk11
+                        apk add curl openjdk11 libc6-compat
                         git_path=`echo ${params.MY_GIT_URL} | cut -d/ -f4,5`
                         echo \${git_path}
                         curl -O https://raw.githubusercontent.com/\${git_path}/${params.MY_GIT_BRANCH}/src/Dockerfile
@@ -322,8 +322,8 @@ pipeline {
                             --user=${ARTY_CREDS_USR}  \
                             --password="${ARTY_CREDS_PSW}" \
                         yann-rt
+                        ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}
                     """
-//                         ./jf docker scan ${env.DOCKER_REGISTRY_URL}/jenkins-javapp:${params.NEW_VERSION}
 
                     rtDockerPush(
                         serverId: env.ART_ID,
