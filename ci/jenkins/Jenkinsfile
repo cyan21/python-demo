@@ -59,7 +59,7 @@ pipeline {
         string(name: 'NEW_MSG', defaultValue: 'Welcome to Swampup 2021', description: '')
 
         string(name: 'PYTHON_REPO', defaultValue: 'stn-python', description: '')
-        string(name: 'GENERIC_REPO', defaultValue: 'stn-generic', description: '')
+        string(name: 'GENERIC_REPO', defaultValue: 'stn-generic-release-local', description: '')
         string(name: 'GENERIC_PROMOTE', defaultValue: 'stn-generic-release-local', description: '')
 
         string(name: 'DOCKER_REPO', defaultValue: 'stn-docker', description: '')
