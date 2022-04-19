@@ -201,31 +201,6 @@ pipeline {
             }
         }
         
-        stage ('Build promotion') {
-            when {
-                expression {
-                    params.PYTHON_BUILD
-                }
-            }
-            steps {
-                rtPromote (
-                    serverId: env.ART_ID,
-                    buildName: env.MY_BUILD_NAME,
-                    buildNumber: env.BUILD_NUMBER,
-                    project: params.JF_PROJECT,
-
-                    targetRepo: params.GENERIC_PROMOTE,
-                    comment: 'Xray scan passed',
-                    status: 'VULN_SCAN_OK',
-                    includeDependencies: false,
-                    copy: false,
-                    failFast: false
-
-                )               
-            }
-        }
-
-        
         stage ('Docker Build & Push') {
             when {
                 expression {
