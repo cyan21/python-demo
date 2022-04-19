@@ -47,9 +47,9 @@ pipeline {
     parameters {
 
         string(name: 'MY_GIT_URL', defaultValue: 'https://github.com/cyan21/python-demo', description: 'DO NOT ADD .git AT THE END')
-        string(name: 'MY_GIT_BRANCH', defaultValue: 'main', description: '')
+        string(name: 'MY_GIT_BRANCH', defaultValue: 'project', description: '')
 
-        string(name: 'JPD_URL', defaultValue: '', description: 'DO NOT ADD PROTOCOL')
+        string(name: 'JPD_URL', defaultValue: 'yann-demo.dev.gcp.devopsacc.team', description: 'DO NOT ADD PROTOCOL')
 
         string(name: 'JF_PROJECT', defaultValue: 'stn', description: 'JFrog Project key')
 
@@ -58,12 +58,12 @@ pipeline {
         string(name: 'YOUR_NAME', defaultValue: 'tony', description: 'will be injected in the config.yaml')
         string(name: 'NEW_MSG', defaultValue: 'Welcome to Swampup 2021', description: '')
 
-        string(name: 'PYTHON_REPO', defaultValue: 'urs-python', description: '')
-        string(name: 'GENERIC_REPO', defaultValue: 'urs-generic', description: '')
-        string(name: 'GENERIC_PROMOTE', defaultValue: 'urs-generic-release-local', description: '')
+        string(name: 'PYTHON_REPO', defaultValue: 'stn-python', description: '')
+        string(name: 'GENERIC_REPO', defaultValue: 'stn-generic', description: '')
+        string(name: 'GENERIC_PROMOTE', defaultValue: 'stn-generic-release-local', description: '')
 
-        string(name: 'DOCKER_REPO', defaultValue: 'urs-docker', description: '')
-        string(name: 'DOCKER_PROMOTE', defaultValue: 'urs-docker-release-local', description: '')
+        string(name: 'DOCKER_REPO', defaultValue: 'stn-docker', description: '')
+        string(name: 'DOCKER_PROMOTE', defaultValue: 'stn-docker-release-local', description: '')
         booleanParam(name: 'DOCKER_SUB_DOMAIN', defaultValue: false, description: 'false means Docker Repo Path')
         
         booleanParam(name: 'PYTHON_BUILD', defaultValue: true, description: 'Enable Python Build')
