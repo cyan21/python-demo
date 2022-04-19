@@ -300,7 +300,7 @@ pipeline {
                     serverId: env.ART_ID,
                     buildName: env.DOCKER_BUILD_NAME,
                     buildNumber: env.BUILD_NUMBER,
-                    project: params.JF_PROJECT
+                    project: params.JF_PROJECT,
 
                     targetRepo: params.DOCKER_PROMOTE,
                     comment: 'Xray scan passed',
