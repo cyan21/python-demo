@@ -220,7 +220,8 @@ pipeline {
                         captureEnv: true,
                         excludeEnvPatterns: ['*MY_BUILD_NAME*', 'DOCKER_BUILD_NAME'],
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
+                        buildNumber: env.BUILD_NUMBER,
+                        project: params.JF_PROJECT
                     )
                     
                     rtDownload (
@@ -237,7 +238,8 @@ pipeline {
                         }""",
                         module: 'webapp',
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
+                        buildNumber: env.BUILD_NUMBER,
+                        project: params.JF_PROJECT
                     )
                     
                     sh """#!/bin/sh
@@ -273,62 +275,19 @@ pipeline {
                         targetRepo: env.DOCKER_REPO,
                         properties: "app.name=${params.APP_NAME};app.version=${params.NEW_VERSION}",
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
+                        buildNumber: env.BUILD_NUMBER,
+                        project: params.JF_PROJECT
                     )
  
                     rtPublishBuildInfo (
                         serverId: env.ART_ID,
                         buildName: env.DOCKER_BUILD_NAME,
-                        buildNumber: env.BUILD_NUMBER
+                        buildNumber: env.BUILD_NUMBER,
+                        project: params.JF_PROJECT
                     )
-
-                    sh """
-                        if [ ${params.INDEX_BUILD} == "true" ]; then
-                            curl \
-                                -XPOST \
-                                -u "${ADM_USER}:${ADM_PASS}" \
-                                -H "Content-Type: application/json" \
-                                -d '{"names":["'${env.DOCKER_BUILD_NAME}'"]}' \
-                            https://${params.JPD_URL}/xray/api/v1/binMgr/builds
-                        else
-                            echo "No indexing"
-                        fi 
-                    """
-
                 }
             } // end steps
         } // end stage
-
-        stage ('Xray scan for Docker Build') {
-            when {
-                expression {
-                    params.DOCKER_BUILD
-                }
-            }
-            steps {
-                xrayScan (
-                    serverId: env.ART_ID,
-                    buildName: env.DOCKER_BUILD_NAME,
-                    buildNumber: env.BUILD_NUMBER,
-                    failBuild: params.FAIL_BUILD 
-                )
-
-                sh """#!/bin/sh
-                    # workaround to see the scan result in the UI
-                    if [ ${params.INDEX_BUILD} == "true" ]; then
-                        curl \
-                            -XPOST \
-                            -u "${ADM_USER}:${ADM_PASS}" \
-                            -H "Content-Type: application/json" \
-                            -d '{"buildName": "'${env.DOCKER_BUILD_NAME}'", "buildNumber": "'${env.BUILD_NUMBER}'" }' \
-                        https://${params.JPD_URL}/xray/api/v1/scanBuild
-                    else
-                        echo "No indexing"
-                    fi 
-                """   
-            }
-        }
-        
 
         stage ('Build promotion for Docker Build') {
             when {
@@ -341,6 +300,7 @@ pipeline {
                     serverId: env.ART_ID,
                     buildName: env.DOCKER_BUILD_NAME,
                     buildNumber: env.BUILD_NUMBER,
+                    project: params.JF_PROJECT
 
                     targetRepo: params.DOCKER_PROMOTE,
                     comment: 'Xray scan passed',
