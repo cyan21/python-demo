@@ -272,7 +272,7 @@ pipeline {
                     rtDockerPush(
                         serverId: env.ART_ID,
                         image: "${env.DOCKER_REGISTRY_URL}/jenkins-python-webapp:${params.NEW_VERSION}",
-                        targetRepo: env.DOCKER_REPO,
+                        targetRepo: params.DOCKER_REPO,
                         properties: "app.name=${params.APP_NAME};app.version=${params.NEW_VERSION}",
                         buildName: env.DOCKER_BUILD_NAME,
                         buildNumber: env.BUILD_NUMBER,
