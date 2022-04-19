@@ -252,6 +252,7 @@ pipeline {
 			  --build-arg REGISTRY=${params.JPD_URL} \
 			  --build-arg RT_USER=${ARTY_CREDS_USR} \
 			  --build-arg RT_TOKEN=${ARTY_CREDS_PSW} \
+			  --build-arg PYTHON_REPO=${params.PYTHON_REPO} \
 			  -t ${env.DOCKER_REGISTRY_URL}/jenkins-python-webapp:${params.NEW_VERSION} \
  			  .
                     """
