@@ -13,6 +13,7 @@ on:
 
 env:
   JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
+  JF_CLI_VERSION: 2.11.0
   APP_VERSION: 2.0.0
   GENERIC_REPO: urs-generic
 
@@ -29,9 +30,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v1.2.0
-#        with:
-#          version: 2.1.1
+        uses: jfrog/setup-jfrog-cli@v2.0.0
+        with:
+          version: ${{ env.JF_CLI_VERSION }}
     
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v2.2.2
@@ -40,21 +41,24 @@ jobs:
 
       - name: Ping Artifactory
         run: |
-            jfrog --version
-            jfrog config show
-            jfrog rt ping
+            jf --version
+            jf config show
+            jf rt ping
             
       - name: Configure JFrog CLI and PIP client
         run: jfrog rt pip-config --repo-resolve ${{ env.PYTHON_REPO }} --server-id-resolve yann-swampup
 
+      - name: Scan dependencies
+        run:  cd src && jf audit 
+
       - name: Install dependencies
-        run: jfrog rt pip-install -r src/requirements.txt --no-cache-dir  --build-name=$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER --module=python_webapp
+        run: jf rt pip-install -r src/requirements.txt --no-cache-dir --module=python_webapp
 
       - name: Package and upload webapp
         run: |
           cd src 
           tar -czvf webapp_python_gha_${{ github.sha }}.tar.gz *.yaml *.txt *.py
-          jfrog rt upload webapp_python_gha_${{ github.sha }}.tar.gz ${{ env.GENERIC_REPO }} --target-props "maturity=release-candidate;platform=windows,linux;test.unit=ready" --build-name $JFROG_CLI_BUILD_NAME --build-number $JFROG_CLI_BUILD_NUMBER --module=python_webapp
+          jf rt upload webapp_python_gha_${{ github.sha }}.tar.gz ${{ env.GENERIC_REPO }} --target-props "maturity=release-candidate;platform=windows,linux;test.unit=ready"  --module=python_webapp
         
       - name: Publish Build Info
         run: |
@@ -69,13 +73,10 @@ jobs:
         run: echo "deploy and test"
 
       - name: Set properties
-        run: jfrog rt sp --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER ${{ env.GENERIC_REPO }}/ "test.unit=ok;version=${{ env.APP_VERSION }}"
-
-      - name: Scan Build 
-        run: jfrog rt bs --fail=false
+        run: jf rt sp --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER ${{ env.GENERIC_REPO }}/ "test.unit=ok;version=${{ env.APP_VERSION }}"
 
       - name: Promote Build 
-        run: jfrog rt bpr   --status "XRAY_SCAN_OK" --comment "promoted to the next level" ${{ env.PROMOTE_REPO }}
+        run: jf rt bpr   --status "XRAY_SCAN_OK" --comment "promoted to the next level" ${{ env.PROMOTE_REPO }}
 
   build_docker:
     needs: build_webapp
@@ -89,11 +90,13 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup JFrog CLI
-        uses: jfrog/setup-jfrog-cli@v1.2.0  
+        uses: jfrog/setup-jfrog-cli@v2.0.0
+        with:
+          version: ${{ env.JF_CLI_VERSION }}
 
       - name: Download webapp
         run: |
-          jfrog rt download \
+          jf rt download \
             --props "version=${{ env.APP_VERSION }}" \
             --build $JFROG_CLI_BUILD_NAME/$JFROG_CLI_BUILD_NUMBER  \
             --build-name=docker-$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER \
@@ -113,6 +116,10 @@ jobs:
           context: src/
           tags: ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-python-webapp:${{ env.APP_VERSION }}
 
+      - name: Scan Docker image 
+        run: >
+          jf docker scan ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-python-webapp:${{ env.APP_VERSION }}
+
       - name: Push Docker image
         run: jfrog rt dp ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-python-webapp:${{ env.APP_VERSION }} ${{ env.DOCKER_REPO }} --build-name=docker-$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER
 
@@ -122,8 +129,5 @@ jobs:
           jfrog rt bag docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
           jfrog rt bp docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
 
-      - name: Scan Build 
-        run: jfrog rt bs --fail=false docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
-
-      - name: Promote Build 
-        run: jfrog rt bpr  --status "XRAY_SCAN_OK" --comment "promoted to the next level" docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER ${{ env.PROMOTE_REPO }}
+      # - name: Promote Build 
+      #   run: jfrog rt bpr  --status "XRAY_SCAN_OK" --comment "promoted to the next level" docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER ${{ env.PROMOTE_REPO }}
