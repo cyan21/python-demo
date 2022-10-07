@@ -12,8 +12,9 @@ on:
   workflow_dispatch:
 
 env:
-  # JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
   JF_ENV_1: ${{ secrets.JF_SECRET }}
+  # the server_id is injected in the JF_SECRET and refers to the CLI profile name
+  SERVER_ID: yann-saas
   JF_CLI_VERSION: 2.27.1
   APP_VERSION: 2.0.0
   GENERIC_REPO: urs-generic
@@ -47,7 +48,7 @@ jobs:
             jf rt ping
             
       - name: Configure JFrog CLI and PIP client
-        run: jf pip-config --repo-resolve ${{ env.PYTHON_REPO }} --server-id-resolve yann-swampup
+        run: jf pip-config --repo-resolve ${{ env.PYTHON_REPO }} --server-id-resolve ${{ env.SERVER_ID }}
 
       - name: Scan dependencies
         run:  cd src && jf audit 
@@ -59,7 +60,9 @@ jobs:
         run: |
           cd src 
           tar -czvf webapp_python_gha_${{ github.sha }}.tar.gz *.yaml *.txt *.py
-          jf rt upload webapp_python_gha_${{ github.sha }}.tar.gz ${{ env.GENERIC_REPO }} --target-props "maturity=release-candidate;platform=windows,linux;test.unit=ready"  --module=python_webapp
+          jf rt upload webapp_python_gha_${{ github.sha }}.tar.gz ${{ env.GENERIC_REPO }} \
+            --target-props "maturity=release-candidate;platform=windows,linux;test.unit=ready" \
+            --module=python_webapp
         
       - name: Publish Build Info
         run: |
