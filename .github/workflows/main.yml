@@ -47,13 +47,13 @@ jobs:
             jf rt ping
             
       - name: Configure JFrog CLI and PIP client
-        run: jfrog rt pip-config --repo-resolve ${{ env.PYTHON_REPO }} --server-id-resolve yann-swampup
+        run: jf pip config --repo-resolve ${{ env.PYTHON_REPO }} --server-id-resolve yann-swampup
 
       - name: Scan dependencies
         run:  cd src && jf audit 
 
       - name: Install dependencies
-        run: jf rt pip-install -r src/requirements.txt --no-cache-dir --module=python_webapp
+        run: jf pip install -r src/requirements.txt --no-cache-dir --module=python_webapp
 
       - name: Package and upload webapp
         run: |
@@ -64,11 +64,11 @@ jobs:
       - name: Publish Build Info
         run: |
           # Collect environment variables for the build
-          jfrog rt bce 
+          jf rt bce 
           # Collect VCS details from git and add them to the build
-          jfrog rt bag
+          jf rt bag
           # Publish build info
-          jfrog rt bp
+          jf rt bp
 
       - name: Run Unit Tests
         run: echo "deploy and test"
@@ -122,13 +122,17 @@ jobs:
           jf docker scan ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-python-webapp:${{ env.APP_VERSION }}
 
       - name: Push Docker image
-        run: jfrog rt dp ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-python-webapp:${{ env.APP_VERSION }} ${{ env.DOCKER_REPO }} --build-name=docker-$JFROG_CLI_BUILD_NAME --build-number=$JFROG_CLI_BUILD_NUMBER
+        run: |
+          jf rt dp ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-python-webapp:${{ env.APP_VERSION }} \
+          ${{ env.DOCKER_REPO }} \
+          --build-name=docker-$JFROG_CLI_BUILD_NAME \
+          --build-number=$JFROG_CLI_BUILD_NUMBER
 
       - name: Publish Docker Build Info
         run: |
-          jfrog rt bce docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
-          jfrog rt bag docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
-          jfrog rt bp docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+          jf rt bce docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+          jf rt bag docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
+          jf rt bp docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER
 
       # - name: Promote Build 
       #   run: jfrog rt bpr  --status "XRAY_SCAN_OK" --comment "promoted to the next level" docker-$JFROG_CLI_BUILD_NAME $JFROG_CLI_BUILD_NUMBER ${{ env.PROMOTE_REPO }}
