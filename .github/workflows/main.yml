@@ -116,7 +116,7 @@ jobs:
       - name: Build Docker images
         uses: docker/build-push-action@v3
         with:
-          build-args: "RT_TOKEN=${{ secrets.RT_SECRET }};RT_USER=${{ env.DOCKER_USER }}"
+          build-args: "RT_TOKEN=${{ secrets.RT_SECRET }},RT_USER=${{ env.DOCKER_USER }}"
           context: src/
           tags: ${{ env.DOCKER_REG }}/${{ env.DOCKER_REPO }}/gha-python-webapp:${{ env.APP_VERSION }}
 
