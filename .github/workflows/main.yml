@@ -13,7 +13,7 @@ on:
 
 env:
   JF_ARTIFACTORY_1: ${{ secrets.JF_ARTIFACTORY_SECRET_1 }}
-  JF_CLI_VERSION: 2.11.0
+  JF_CLI_VERSION: 2.27.1
   APP_VERSION: 2.0.0
   GENERIC_REPO: urs-generic
 
