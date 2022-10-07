@@ -47,7 +47,7 @@ jobs:
             jf rt ping
             
       - name: Configure JFrog CLI and PIP client
-        run: jf pip config --repo-resolve ${{ env.PYTHON_REPO }} --server-id-resolve yann-swampup
+        run: jf pip-config --repo-resolve ${{ env.PYTHON_REPO }} --server-id-resolve yann-swampup
 
       - name: Scan dependencies
         run:  cd src && jf audit 
